@@ -44,7 +44,7 @@ export function OrganizersSection() {
             whether the map is on at all.
           </p>
           <Link
-            href="/org"
+            href="/login?returnTo=/org"
             className="border-line text-ink hover:border-line-loud mt-8 inline-flex h-12 items-center rounded-[10px] border px-5 font-[family-name:var(--font-display)] text-[16px] font-semibold transition-colors duration-[120ms] ease-[cubic-bezier(.16,1,.3,1)]"
           >
             Create an event

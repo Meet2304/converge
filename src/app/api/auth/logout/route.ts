@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { clearSessionCookie } from "@/lib/auth/session";
 
 export async function POST() {
@@ -6,7 +6,7 @@ export async function POST() {
   return NextResponse.json({ ok: true });
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   await clearSessionCookie();
-  return NextResponse.redirect(new URL("/", process.env.AUTH0_BASE_URL || "http://localhost:3000"));
+  return NextResponse.redirect(new URL("/", req.url));
 }

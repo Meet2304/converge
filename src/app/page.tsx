@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { FieldProvider } from "@/components/field/FieldProvider";
 import { FindSection } from "@/components/landing/FindSection";
 import { Hero } from "@/components/landing/Hero";
@@ -6,8 +7,18 @@ import { LookingSection } from "@/components/landing/LookingSection";
 import { Nav } from "@/components/landing/Nav";
 import { ProgressiveBlur } from "@/components/landing/ProgressiveBlur";
 import { Footer, OpenSourceSection, OrganizersSection } from "@/components/landing/Sections";
+import { loginPath } from "@/lib/auth/paths";
 
-export default function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ login?: string; returnTo?: string }>;
+}) {
+  const sp = await searchParams;
+  if (sp.login === "1") {
+    redirect(loginPath(sp.returnTo || "/org"));
+  }
+
   return (
     <FieldProvider>
       <Loader />

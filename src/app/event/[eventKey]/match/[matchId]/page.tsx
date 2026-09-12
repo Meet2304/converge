@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireUser } from "@/lib/auth/context";
+import { loginPath } from "@/lib/auth/paths";
 import type { SessionUser } from "@/lib/auth/types";
 import { getEventByKey } from "@/lib/db/events";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -20,7 +21,7 @@ export default async function MatchPage({
   try {
     user = await requireUser();
   } catch {
-    redirect(`/?login=1&returnTo=/event/${eventKey}/match/${matchId}`);
+    redirect(loginPath(`/event/${eventKey}/match/${matchId}`));
   }
 
   const db = createAdminClient();

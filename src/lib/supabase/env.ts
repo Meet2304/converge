@@ -1,13 +1,13 @@
+const FALLBACK_SUPABASE_URL = "https://cxhfmsnkcketqdlcqdic.supabase.co";
+const FALLBACK_SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4aGZtc25rY2tldHFkbGNxZGljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxODc1MDQsImV4cCI6MjEwNDc2MzUwNH0.X358x5Ow8oTRhXlGoD9PQN-1KPfuS9QosgPT5DSMz6w";
+
 export function getSupabaseUrl() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!url) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL");
-  return url;
+  return process.env.NEXT_PUBLIC_SUPABASE_URL || FALLBACK_SUPABASE_URL;
 }
 
 export function getSupabaseAnonKey() {
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!key) throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY");
-  return key;
+  return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || FALLBACK_SUPABASE_ANON_KEY;
 }
 
 export function getServiceRoleKey() {

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { requireUser } from "@/lib/auth/context";
+import { loginPath } from "@/lib/auth/paths";
 import type { SessionUser } from "@/lib/auth/types";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -16,7 +17,7 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ orgI
   try {
     user = await requireUser();
   } catch {
-    redirect(`/?login=1&returnTo=/org/${orgId}`);
+    redirect(loginPath(`/org/${orgId}`));
   }
 
   const db = createAdminClient();

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useId, useState } from "react";
 import { useField } from "@/components/field/FieldProvider";
 
-const CODE_LENGTH = 8;
+const CODE_LENGTH = 6;
 
 /**
  * Pulls a code out of whatever someone pasted.

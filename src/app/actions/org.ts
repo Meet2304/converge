@@ -43,6 +43,87 @@ export async function createOrganization(formData: FormData) {
   redirect(`/org/${org.id}`);
 }
 
+export async function createDemoEvent() {
+  const user = await requireUser();
+  const db = createAdminClient();
+
+  const { data: memberships } = await db
+    .from("org_memberships")
+    .select("org_id, organizations(id, name)")
+    .eq("user_id", user.id)
+    .limit(1);
+
+  let orgId = memberships?.[0]?.org_id as string | undefined;
+  if (!orgId) {
+    let slug = slugify(user.displayName ? `${user.displayName} org` : "demo-org");
+    const { data: clash } = await db
+      .from("organizations")
+      .select("id")
+      .eq("slug", slug)
+      .maybeSingle();
+    if (clash) slug = `${slug}-${makeShareCode().slice(0, 3).toLowerCase()}`;
+
+    const { data: org, error } = await db
+      .from("organizations")
+      .insert({
+        name: user.displayName ? `${user.displayName}'s org` : "Demo organization",
+        slug,
+        owner_user_id: user.id,
+        contact_email: user.email,
+        description: "Created from one-click demo setup.",
+      })
+      .select("id")
+      .single();
+    if (error || !org) throw new Error(error?.message ?? "Failed to create org");
+
+    await db.from("org_memberships").insert({
+      org_id: org.id,
+      user_id: user.id,
+      role: "owner",
+    });
+    orgId = org.id;
+  }
+
+  const starts = new Date();
+  const ends = new Date(starts.getTime() + 48 * 60 * 60 * 1000);
+  let shareCode = makeShareCode();
+  for (let i = 0; i < 5; i++) {
+    const { data: exists } = await db
+      .from("events")
+      .select("id")
+      .eq("share_code", shareCode)
+      .maybeSingle();
+    if (!exists) break;
+    shareCode = makeShareCode();
+  }
+
+  const { data: event, error } = await db
+    .from("events")
+    .insert({
+      org_id: orgId,
+      name: "Demo hackathon",
+      slug: slugify(`demo-hackathon-${shareCode}`),
+      short_description: "Looking is open. Share the code and start matching.",
+      venue_name: "Demo venue",
+      timezone: "America/New_York",
+      starts_at: starts.toISOString(),
+      ends_at: ends.toISOString(),
+      looking_opens_at: starts.toISOString(),
+      max_team_size: 4,
+      min_team_size: 1,
+      share_code: shareCode,
+      created_by: user.id,
+      map_enabled: true,
+      chat_enabled: true,
+    })
+    .select("id")
+    .single();
+  if (error || !event) throw new Error(error?.message ?? "Failed to create event");
+
+  revalidatePath(`/org/${orgId}`);
+  redirect(`/org/${orgId}/events/${event.id}`);
+}
+
 export async function createEvent(formData: FormData) {
   const user = await requireUser();
   const orgId = String(formData.get("orgId") || "");

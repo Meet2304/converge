@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { requireUser } from "@/lib/auth/context";
+import { loginPath } from "@/lib/auth/paths";
 import type { SessionUser } from "@/lib/auth/types";
 import { getEventByKey, getMyParticipation } from "@/lib/db/events";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -22,7 +23,7 @@ export default async function TeamDetailPage({
   try {
     user = await requireUser();
   } catch {
-    redirect(`/?login=1&returnTo=/event/${eventKey}/team/${teamId}`);
+    redirect(loginPath(`/event/${eventKey}/team/${teamId}`));
   }
 
   const db = createAdminClient();

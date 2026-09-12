@@ -5,16 +5,12 @@ export async function GET(req: NextRequest) {
   const returnTo = req.nextUrl.searchParams.get("returnTo") || "/org";
 
   if (!auth0Configured()) {
-    if (authDevBypassEnabled()) {
-      const page = new URL("/", req.url);
-      page.searchParams.set("login", "1");
-      page.searchParams.set("returnTo", returnTo);
-      return NextResponse.redirect(page);
+    const page = new URL("/login", req.url);
+    page.searchParams.set("returnTo", returnTo);
+    if (!authDevBypassEnabled()) {
+      page.searchParams.set("error", "auth-unavailable");
     }
-    return NextResponse.json(
-      { error: "Auth0 is not configured and AUTH_DEV_BYPASS is false" },
-      { status: 503 },
-    );
+    return NextResponse.redirect(page);
   }
 
   const issuer = process.env.AUTH0_ISSUER_BASE_URL?.replace(/\/$/, "");
