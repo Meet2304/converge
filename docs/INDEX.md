@@ -134,7 +134,7 @@
 | ID | Concept | Status | Detail |
 |----|---------|--------|--------|
 | 7.1 | Dithered light field; convergence carries state | [L] | [design/field.md](design/field.md) |
-| 7.2 | Field renderer — import, do not reimplement | [L] | [design/proof/field-renderer.js](design/proof/field-renderer.js) |
+| 7.2 | Field renderer — import, do not reimplement | [L] | [../src/lib/field/renderer.js](../src/lib/field/renderer.js) |
 | 7.3 | Ground `#000`; hue only destructive + confirmed | [L] | [design/color.md](design/color.md) |
 | 7.4 | Kanit / Schibsted Grotesk / Martian Mono | [L] | [design/type.md](design/type.md) |
 | 7.5 | Radius encodes surface weight; no shadows | [L] | [design/form.md](design/form.md) |
@@ -142,6 +142,8 @@
 | 7.7 | morphicons (two-state) vs animate-ui (feedback) | [L] | [design/icons.md](design/icons.md) |
 | 7.8 | Field convergence as day-of warmer/colder | [L] | [design/field.md](design/field.md) §4.1 · §6 |
 | 7.9 | Tier 2 panels, Tier 3 hairline, baked fallbacks | Open | [design/field.md](design/field.md) §12 |
+| 7.10 | UI kit restyling (shadcn defaults vs system) | [L] | [design/ui-kit.md](design/ui-kit.md) |
+| 7.11 | Landing page — one field, scroll-driven convergence | [L] | [../src/app/page.tsx](../src/app/page.tsx) |
 
 ---
 

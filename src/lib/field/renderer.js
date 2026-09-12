@@ -112,6 +112,19 @@ export const FIELD_DEFAULTS = {
 /** Convergence 0 → 1 maps onto this waist range. */
 export const WAIST_OPEN = 0.85, WAIST_CLOSED = 0.06;
 
+/**
+ * Aspect the locked parameters were fitted at (the reference header).
+ *
+ * Coordinates normalise by height, so a squarer viewport has less horizontal
+ * room and the lobes — which flare as |y| grows — end up filling the frame
+ * instead of sweeping out of it. Scaling flare by aspect keeps the beams in
+ * the same relationship to the frame at any shape. At the reference aspect
+ * the multiplier is exactly 1, so nothing about the fitted look changes.
+ */
+export const REFERENCE_ASPECT = 2.3337;
+export const aspectFlare = (w, h) =>
+  Math.max(0.4, Math.min(1.15, w / h / REFERENCE_ASPECT));
+
 /** Damping time constants, seconds. field.md §3.1. */
 export const TAU = { origin: 0.18, gain: 0.45, flare: 0.25, waist: 0.90 };
 
@@ -216,13 +229,12 @@ function compile(gl, type, src) {
  * @param {object} [opts.params]        overrides for FIELD_DEFAULTS
  * @param {number} [opts.convergence]   0..1, see field.md §4
  * @param {number} [opts.influence]     0..1 pointer response, 0 disables
+ * @param {boolean} [opts.ambient]      breathe at any convergence, not just held
  * @param {Element} [opts.pointerTarget] defaults to the canvas
  * @param {boolean} [opts.autoStart]    default true
  * @param {boolean} [opts.observe]      pause offscreen / on tab blur, default true
- * @returns {object} field handle
- *
- * Returns null if WebGL2 is unavailable — callers must fall back to a baked
- * still (field.md §8) rather than assuming this succeeds.
+ * @returns The field handle, or `null` when WebGL2 is unavailable — callers
+ * must fall back to a baked still (field.md §8) rather than assume success.
  */
 export function createField(canvas, opts = {}) {
   const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'high-performance' });
@@ -267,7 +279,11 @@ export function createField(canvas, opts = {}) {
     frozen: reduced,
     shimmer: false,
     bloomAt: -1e9,
-    bloomHold: null
+    bloomHold: null,
+    // Breathing normally marks the held team-formed state. `ambient` makes it
+    // available at any convergence, so a hero can stay alive without
+    // pretending a team just formed.
+    ambient: opts.ambient ?? false
   };
 
   const cur = { waist: params.waist, gain: params.gain, flare: params.flare,
@@ -351,13 +367,15 @@ export function createField(canvas, opts = {}) {
       cur.flare = damp(cur.flare, params.flare * (1 + 0.60 * cur.flareBoost), tau.flare, dt);
     }
 
-    const held = state.convergence !== null && state.convergence >= 0.98;
+    const held = state.ambient
+      || (state.convergence !== null && state.convergence >= 0.98);
     const breathMul = (held && !state.frozen)
       ? 1 + breathe.amp * Math.sin(now / 1000 * (2 * Math.PI / breathe.period)) : 1;
 
     gl.uniform2f(uniforms.uResolution, W, H);
     applyUniforms(params, {
-      ox: cur.ox, oy: cur.oy, waist: cur.waist, flare: cur.flare,
+      ox: cur.ox, oy: cur.oy, waist: cur.waist,
+      flare: cur.flare * aspectFlare(W, H),
       gain: cur.gain * breathMul,
       halo: params.halo * (1 + Math.max(0, bloom) * bloomCfg.haloLift),
       bloom,
@@ -390,9 +408,9 @@ export function createField(canvas, opts = {}) {
 
   // A field nobody is looking at costs zero. field.md §9.
   let io = null;
-  const onVisibility = () => { document.hidden ? stop() : start(); };
+  const onVisibility = () => { if (document.hidden) stop(); else start(); };
   if (opts.observe !== false && typeof IntersectionObserver === 'function') {
-    io = new IntersectionObserver(([e]) => { e.isIntersecting ? start() : stop(); }, { threshold: 0 });
+    io = new IntersectionObserver(([e]) => { if (e.isIntersecting) start(); else stop(); }, { threshold: 0 });
     io.observe(canvas);
     document.addEventListener('visibilitychange', onVisibility);
   }
@@ -419,6 +437,17 @@ export function createField(canvas, opts = {}) {
       if (o.bloom || (o.bloom !== false && v >= 0.98)) state.bloomAt = performance.now() / 1000;
     },
     triggerBloom() { state.bloomAt = performance.now() / 1000; },
+
+    /**
+     * Drive convergence from scroll. Never fires the team-formed bloom —
+     * scrolling past 0.98 is not a team forming.
+     */
+    setScrollConvergence(v) {
+      state.convergence = v;
+      params.waist = waistFor(v);
+    },
+
+    setAmbient(v) { state.ambient = v; },
     setInfluence(v) { state.influence = v; },
     setFrozen(v) { state.frozen = v; },
     setShimmer(v) { state.shimmer = v; },
