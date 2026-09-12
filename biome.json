@@ -9,6 +9,14 @@
     "ignoreUnknown": true,
     "includes": ["**", "!!docs/design/proof"]
   },
+  "overrides": [
+    {
+      "includes": ["vercel.json"],
+      "formatter": {
+        "enabled": false
+      }
+    }
+  ],
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
