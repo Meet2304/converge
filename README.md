@@ -39,7 +39,13 @@ We’re **not** building a recommendation engine or another Discord. The goal is
 
 ## Status
 
-Product direction is locked (auth → join → pre-event → day-of). **The app is still in early build** — this repo holds the product definition and upcoming implementation.
+Product definition through day-of is locked. **Next.js + Tailwind + shadcn skeleton is in-repo** (bun). Next: Auth0.
+
+```bash
+bun install
+bun dev
+```
+
 
 ## Learn more
 
