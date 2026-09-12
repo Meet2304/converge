@@ -1,0 +1,62 @@
+# AGENTS.md — Converge
+
+Instructions for any coding or research agent working on **Converge**.
+
+## What this product is
+
+Converge is a **web (Next.js)** product for **hackathon team formation**: progressive join → profiles → likes/match → teams/chat before the event → **map-first** find-each-other on day-of.
+
+Read the vision in one pass: [`docs/vision.md`](docs/vision.md).
+
+## Source of truth (do not invent product rules)
+
+| Priority | Doc | Use for |
+|----------|-----|---------|
+| 1 | [`docs/vision.md`](docs/vision.md) | Central idea, non-goals, stack |
+| 2 | [`docs/INDEX.md`](docs/INDEX.md) | Numbered concept hierarchy — jump by ID |
+| 3 | [`docs/auth.md`](docs/auth.md) | Auth0, progressive access, PII, likes, reports, location gates |
+| 4 | [`docs/onboarding.md`](docs/onboarding.md) | Org event fields + candidate Join profile |
+| 5 | [`docs/medium.md`](docs/medium.md) | Web-first + Next.js; no app-required join |
+| 6 | [`docs/pre-hackathon.md`](docs/pre-hackathon.md) | Event scroll, looking list, match, teams |
+| 7 | [`docs/day-of.md`](docs/day-of.md) | Map-first, privacy, finder, pins, geofence |
+| 8 | [`docs/ux-brainstorm.md`](docs/ux-brainstorm.md) | Phase status checklist |
+| 9 | [`docs/project-context.md`](docs/project-context.md) | Process-optimization framing |
+
+**Conflict rule:** Locked docs above win over chat history, README drafts, or assumptions. To change product behavior, update the relevant locked doc (or ask the user) — do not silently diverge in code.
+
+## How to start a task
+
+1. Read this file + `docs/vision.md`.
+2. Open `docs/INDEX.md` and note the section IDs your task touches (e.g. `5.x` teams, `6.x` map).
+3. Read only the linked SoT docs for those IDs.
+4. Implement against those rules (validators, gates, privacy).
+5. If something is marked **deferred** in INDEX (`[D]`), skip it unless the user explicitly expands scope.
+6. If something is **pending credentials** (`[P]`, e.g. Grok), stub behind config; do not block the rest of the feature.
+
+## Hard constraints agents must respect
+
+- **Next.js web** client; shareable link/code; **no install gate** to join.
+- **Auth0 + Google only** for MVP sign-in.
+- **Progressive access:** useful anonymized browse before sign-in; chat + PII after.
+- **Socials:** never to signed-out viewers; default public to signed-in; per-link private opt-out.
+- **Pre-event:** single-scroll event page; likes without like-cap; mutual → match UI; teams + group chat; one team per event at a time.
+- **Day-of:** map-first when org enables location; **Join before share location**; teamed users see **teammates only**; finder needs **want to be found**; in-app notifications only; hybrid geofence (warn + hide outside buffer).
+- **Do not** build recommendation/ranking engines, native-required flows, email/push, or Discord-clone global channels unless docs are updated.
+
+## Implementation notes
+
+- Prefer small, reviewable diffs aligned to one INDEX section.
+- When adding UI copy or empty states, match the locked journey language (Join, Looking, Match, Team, Find, Want to be found).
+- Keep org and candidate surfaces in one web app (different modes), per medium/auth.
+- Anon session → Auth0 merge for likes, reports, and location (see auth.md).
+
+## Out of scope unless asked
+
+- Recommendation / compatibility ranking
+- Native iOS/Android app as primary client
+- Perfect indoor positioning / BLE
+- Expanding login providers beyond Google
+
+## Status snapshot
+
+UX definition is **locked** through day-of. Next phase is **execution** (implementation), guided by this file and `docs/INDEX.md`.

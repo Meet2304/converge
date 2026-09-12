@@ -52,6 +52,17 @@ Implementation reference for authentication, authorization, and stage-by-stage v
 | Team overrides personal | **Yes** — team track **overrides** personal interest for display/dashboards; **inform affected users** of the change |
 | Who can change team track | **Any team member** |
 | On team track change | **Notify all members in the team’s common group chat** |
+| Pre-event team formation | **Yes** — see [pre-hackathon.md](pre-hackathon.md) |
+| Team group chat | **Required** — every team has one |
+| Create team | Any **signed-in** event joiner |
+| Team invites | In-app **and** invite link/code |
+| Team permissions | **Creator** kick/rename; **any member** invite |
+| Looking when team full | **Auto-off**; under max show **needs N more** |
+| Leave team | Anytime pre-event; **last member leaves → team dissolves** |
+| One team per event | **Yes** — at most one team at a time **per event**; **multiple events → multiple teams OK** |
+| Switch team (same event) | Accepting another invite while teamed: **user chooses** stay vs leave-and-join (no silent switch) |
+| Creator leaves | **Transfer creator** — must pick a remaining member before leave; sole member → dissolve |
+| Landing event code | **Global enter-code** on landing + deep links |
 | Change after select | Yes — until organizer lock |
 
 ### 2.3 Organizer visibility & power
@@ -141,10 +152,14 @@ Implementation reference for authentication, authorization, and stage-by-stage v
 | Decision | Locked |
 |----------|--------|
 | Like requires Auth0 | No |
-| Notify liked user | **Yes — anonymous ping:** “Someone liked you” (no name while relevant party unsigned) |
+| Like cap | **None** |
+| One-way like | Liker can revisit **people they liked** (profile under anon/PII rules) |
+| Mutual like | Special **“It’s a match”** UI (see pre-hackathon.md) |
+| Notify liked user | **Yes — anonymous ping:** “Someone liked you” (no name while relevant party unsigned); **in-app only** pre-event |
 | CTA on ping | **Ask them to sign in to communicate** |
 | See who liked you | After **viewer signs in**, liker identity visible if liker has signed up / is identifiable under signed-in rules |
 | Persist across login | Anonymous likes merge into Auth0 user on sign-in |
+| PII until sign-in | Names/nicknames/socials stay anonymized for signed-out viewers (including likes/match surfaces) |
 
 ---
 
@@ -153,11 +168,20 @@ Implementation reference for authentication, authorization, and stage-by-stage v
 | Decision | Locked |
 |----------|--------|
 | When available | Day of hackathon, only after **organizer enables**; ends on event end or org disable |
-| Signed-out location share | Allowed |
-| Viewing others / navigate | Requires **granting own location** (even if signed out) |
+| Join before share | **Must Join event** (min profile) before sharing location — link-only is not enough |
+| Signed-out location share | Allowed **only after Join** (anon session + min profile); Auth0 still not required to share |
+| Viewing others / navigate | Requires **granting own location** |
+| Map population (not on a team) | **Looking + matches** who are sharing (see day-of.md privacy) |
+| Map population (on a team) | **Teammates only** — cannot see other people’s live locations |
+| Team location privacy | Teammate live locations are **not** visible to non-teammates |
+| Want to be found | Separate opt-in; Finder only targets visible people with location on + this opt-in |
+| User pins | Users can **drop pins** (meetup-style) |
 | Map type | **Realtime, real maps** (not static venue image) |
 | Navigation UX | **In-app** AirTag-like personalized finder |
-| Indoor GPS poor | **Coarse pin + proximity / “getting warmer”** style feedback (not zone check-in MVP; not “ignore drift”) |
+| Indoor GPS poor | **Coarse pin + warmer/colder** |
+| Notifications (day-of) | **In-app only** |
+| Geofence | **Hybrid:** warn when too far; past outer buffer → **invisible** to others |
+| Map chrome (D3) | **Map-first** full-screen when location mode on; list/profile as sheets / secondary nav |
 
 ---
 
