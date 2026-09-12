@@ -28,6 +28,10 @@
 | 1.3 | No install required to join | [L] | [medium.md](medium.md) |
 | 1.4 | Optional PWA later | [L] leaning | [medium.md](medium.md) |
 | 1.5 | Native app MVP | [D] | Only if web GPS/push fails later |
+| 1.6 | Hosting | [L] | **Vercel** — [stack.md](stack.md) |
+| 1.7 | Backend DB | [L] | **Supabase** (Postgres + Realtime + Storage) — [stack.md](stack.md) |
+| 1.8 | UI kit | [L] | **shadcn/ui** + design system — [stack.md](stack.md), [design/](design/README.md) |
+| 1.9 | Maps / P2P nav (MVP) | [L] | **Google Maps JS** + Supabase live presence — [stack.md](stack.md), [maps-google-p2p-navigation.md](maps-google-p2p-navigation.md) |
 
 ---
 
@@ -147,8 +151,11 @@
 2. [vision.md](vision.md)  
 3. This [INDEX.md](INDEX.md) — jump by ID  
 4. Domain SoTs: [auth.md](auth.md) → [onboarding.md](onboarding.md) → [medium.md](medium.md) → [pre-hackathon.md](pre-hackathon.md) → [day-of.md](day-of.md)  
-5. Visual language: [design/README.md](design/README.md) → [design/field.md](design/field.md)  
-6. Build only what the active task needs; do not implement deferred `[D]` items unless asked  
+5. Stack / snappiness: [stack.md](stack.md), [perf-risks.md](perf-risks.md)  
+6. Schema: [schema-priorities.md](schema-priorities.md) → [schema.md](schema.md)  
+7. Visual language: [design/README.md](design/README.md) → [design/field.md](design/field.md)  
+8. Build order: [build-order.md](build-order.md) · [../plans/execution-order.md](../plans/execution-order.md)  
+9. Build only what the active task needs; do not implement deferred `[D]` items unless asked  
 
 ---
 
@@ -163,4 +170,7 @@
 | Map / finder / geofence | §6 · [day-of.md](day-of.md) |
 | Colors, type, radius, motion | §7 · [design/README.md](design/README.md) |
 | The header gradient / how to build it | §7.1 · [design/field.md](design/field.md) |
+| Tables / RLS / schema | [schema.md](schema.md) · [schema-priorities.md](schema-priorities.md) |
+| Stack / snappiness | [stack.md](stack.md) · [perf-risks.md](perf-risks.md) |
+| What to build next | [build-order.md](build-order.md) |
 | “Don’t build recommendations” | §0.4 · [project-context.md](project-context.md) |
