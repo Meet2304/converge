@@ -1,5 +1,6 @@
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
+import { normalizeAuth0Issuer } from "./auth0";
 import { SESSION_COOKIE, SESSION_MAX_AGE } from "./constants";
 import type { AppSession, SessionUser } from "./types";
 
@@ -67,8 +68,7 @@ export function auth0Configured() {
   return Boolean(
     process.env.AUTH0_CLIENT_ID &&
       process.env.AUTH0_CLIENT_SECRET &&
-      process.env.AUTH0_ISSUER_BASE_URL &&
-      process.env.AUTH0_BASE_URL,
+      normalizeAuth0Issuer(process.env.AUTH0_ISSUER_BASE_URL),
   );
 }
 
