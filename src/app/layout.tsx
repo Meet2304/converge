@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Kanit, Martian_Mono, Schibsted_Grotesk } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 // Three faces, three jobs, no overlap — docs/design/type.md.
@@ -40,7 +41,10 @@ export default function RootLayout({
       lang="en"
       className={`${kanit.variable} ${schibsted.variable} ${martianMono.variable} dark h-full antialiased`}
     >
-      <body className="bg-void text-ink flex min-h-full flex-col">{children}</body>
+      <body className="bg-void text-ink flex min-h-full flex-col">
+        <div className="flex flex-1 flex-col">{children}</div>
+        <Toaster />
+      </body>
     </html>
   );
 }
