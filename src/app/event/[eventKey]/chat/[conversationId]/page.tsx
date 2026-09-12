@@ -4,6 +4,7 @@ import { sendMessage } from "@/app/actions/social";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { requireUser } from "@/lib/auth/context";
+import { loginPath } from "@/lib/auth/paths";
 import type { SessionUser } from "@/lib/auth/types";
 import { getEventByKey, getMyParticipation } from "@/lib/db/events";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -24,7 +25,7 @@ export default async function ChatPage({
   try {
     user = await requireUser();
   } catch {
-    redirect(`/?login=1&returnTo=/event/${eventKey}/chat/${conversationId}`);
+    redirect(loginPath(`/event/${eventKey}/chat/${conversationId}`));
   }
 
   const mine = await getMyParticipation(event.id, {

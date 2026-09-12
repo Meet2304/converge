@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createOrganization } from "@/app/actions/org";
+import { createDemoEvent, createOrganization } from "@/app/actions/org";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { requireUser } from "@/lib/auth/context";
+import { loginPath } from "@/lib/auth/paths";
 import type { SessionUser } from "@/lib/auth/types";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -15,7 +16,7 @@ export default async function OrgHomePage() {
   try {
     user = await requireUser();
   } catch {
-    redirect("/?login=1&returnTo=/org");
+    redirect(loginPath("/org"));
   }
 
   const db = createAdminClient();
@@ -26,9 +27,14 @@ export default async function OrgHomePage() {
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-6 py-10">
-      <div>
-        <p className="text-sm text-muted-foreground">Organizer</p>
-        <h1 className="text-3xl font-semibold tracking-tight">Your organizations</h1>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm text-muted-foreground">Organizer</p>
+          <h1 className="text-3xl font-semibold tracking-tight">Your organizations</h1>
+        </div>
+        <form action={createDemoEvent}>
+          <Button type="submit">Create a demo event</Button>
+        </form>
       </div>
 
       <div className="grid gap-4">

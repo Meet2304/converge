@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { requireUser } from "@/lib/auth/context";
+import { loginPath } from "@/lib/auth/paths";
 import type { SessionUser } from "@/lib/auth/types";
 import { getEventByKey, getMyParticipation } from "@/lib/db/events";
 
@@ -17,7 +18,7 @@ export default async function TeamIndexPage({ params }: { params: Promise<{ even
   try {
     user = await requireUser();
   } catch {
-    redirect(`/?login=1&returnTo=/event/${eventKey}/team`);
+    redirect(loginPath(`/event/${eventKey}/team`));
   }
   const mine = await getMyParticipation(event.id, { userId: user.id, anonSessionId: "" });
   if (!mine) redirect(`/event/${event.share_code}/join`);

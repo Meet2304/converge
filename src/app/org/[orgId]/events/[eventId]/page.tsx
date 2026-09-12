@@ -7,7 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { requireUser } from "@/lib/auth/context";
+import { loginPath } from "@/lib/auth/paths";
 import type { SessionUser } from "@/lib/auth/types";
+import { getAppOrigin } from "@/lib/http/origin";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function ManageEventPage({
@@ -20,7 +22,7 @@ export default async function ManageEventPage({
   try {
     user = await requireUser();
   } catch {
-    redirect(`/?login=1&returnTo=/org/${orgId}/events/${eventId}`);
+    redirect(loginPath(`/org/${orgId}/events/${eventId}`));
   }
 
   const db = createAdminClient();
@@ -57,9 +59,8 @@ export default async function ManageEventPage({
     .order("created_at", { ascending: false })
     .limit(50);
 
-  const origin =
-    process.env.AUTH0_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const shareUrl = `${origin}/event/${event.share_code}`;
+  const origin = await getAppOrigin();
+  const shareUrl = `${origin}/e/${event.share_code}`;
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-6 py-10">
