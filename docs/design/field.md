@@ -335,7 +335,7 @@ Team-formed response (§4.2):
 | `haloLift` | 2.2 |
 | breathe | ±6% over 9s |
 
-All of these live in `proof/field-renderer.js` as `FIELD_DEFAULTS`, `TAU`, `BLOOM` and `BREATHE`. That file is the source of truth; this table documents it.
+All of these live in [`src/lib/field/renderer.js`](../../src/lib/field/renderer.js) as `FIELD_DEFAULTS`, `TAU`, `BLOOM` and `BREATHE`. That file is the source of truth; this table documents it.
 
 ### How these were derived
 
@@ -363,29 +363,35 @@ The field lives in two files, and the split matters.
 
 | File | What it is |
 |------|-----------|
-| **`proof/field-renderer.js`** | **The field.** Framework-free ES module, no dependencies, no build step. Shaders, locked constants, damping, the bloom envelope, blue-noise generation, and `createField(canvas, opts)`. |
-| `proof/field.html` | The tuning harness. Panel, sliders, presets, overlay, auto-fit. Throwaway — it exists to make decisions, not to ship. |
+| **[`src/lib/field/renderer.js`](../../src/lib/field/renderer.js)** | **The field.** Framework-free ES module, no dependencies, no build step. Shaders, locked constants, damping, the bloom envelope, blue-noise generation, and `createField(canvas, opts)`. It lives in the app because the app is what ships it. |
+| [`proof/field.html`](proof/field.html) | The tuning harness. Panel, sliders, presets, overlay, auto-fit. Throwaway — it exists to make decisions, not to ship. |
 
-**The renderer is the deliverable.** The harness imports it, so what you tune in the panel is the same code the app runs — there is no second implementation to drift. When the Next.js app is built, it imports this file too.
+**The renderer is the deliverable.** The harness imports the same file the app does, so what you tune in the panel is what runs in production — there is no second implementation to drift.
 
 ```js
-import { createField } from './field-renderer.js';
+import { createField } from "@/lib/field/renderer.js"
 
-const field = createField(canvas, { convergence: 0.35 });
-if (!field) showBakedStill();            // no WebGL2 — see §8
+const field = createField(canvas, { convergence: 0.35, ambient: true })
+if (!field) showBakedStill()                  // no WebGL2 — see §8
 
-field.setConvergence(0.95);              // match
-field.setConvergence(1.0, { bloom: true });  // team formed, with the response
-field.destroy();                         // on unmount
+field.setScrollConvergence(0.6)               // scroll-driven, never blooms
+field.setConvergence(1.0, { bloom: true })    // team formed, with the response
+field.destroy()                               // on unmount
 ```
 
 `createField` returns `null` rather than throwing when WebGL2 is missing, so the fallback is a branch the caller must handle. It respects `prefers-reduced-motion` on its own, and with `observe: true` (the default) it stops its own rAF loop offscreen and on tab blur.
 
+**`ambient: true`** makes the breathe available at any convergence rather than only in the held team-formed state — what a hero needs to stay alive without pretending a team just formed.
+
+**Flare scales with aspect.** The locked parameters were fitted on a 2.33 letterbox. Because coordinates normalise by height, a squarer viewport has less horizontal room and the lobes end up filling the frame instead of sweeping out of it. `aspectFlare()` corrects for that and is exactly 1.0 at the reference aspect, so the fitted look is unchanged where it was fitted.
+
 ### Running the harness
 
 ```bash
-cd docs/design && npx serve
+npx serve        # from the repo root — the harness imports from src/
 ```
+
+Then open `/docs/design/proof/field.html`.
 
 A server is required now that the harness is an ES module — `file://` blocks module imports. It was already required for **auto-fit**, which reads the reference image back off a canvas and is blocked by canvas tainting on `file://`; the button reports *blocked* if you try.
 

@@ -48,7 +48,7 @@ Read the vision in one pass: [`docs/vision.md`](docs/vision.md).
 - **Pre-event:** single-scroll event page; likes without like-cap; mutual → match UI; teams + group chat; one team per event at a time.
 - **Day-of:** map-first when org enables location; **Join before share location**; teamed users see **teammates only**; finder needs **want to be found**; in-app notifications only; hybrid geofence (warn + hide outside buffer).
 - **UI kit:** prefer **shadcn/ui** for chat, dashboards, and app chrome wherever practical; honor [`docs/design/`](docs/design/README.md) for visual language.
-- **Visual language:** true `#000` ground, no shadows, hue only for destructive and confirmed state, Kanit never below 16px. The dithered field is imported from [`docs/design/proof/field-renderer.js`](docs/design/proof/field-renderer.js) — do not reimplement it.
+- **Visual language:** true `#000` ground, no shadows, hue only for destructive and confirmed state, Kanit never below 16px. The dithered field is imported from [`src/lib/field/renderer.js`](src/lib/field/renderer.js) — do not reimplement it.
 - **Snappiness (locked):** honor [perf-risks.md](docs/perf-risks.md) — budgets; optimistic like/chat/looking/team; Maps JS only on day-of + Find; Join never blocked on Grok/resume; split Realtime channels; event bootstrap RPC; live GPS via Supabase **Broadcast** (not DB-per-ping).
 - **Do not** build recommendation/ranking engines, native-required flows, email/push, or Discord-clone global channels unless docs are updated.
 
@@ -59,6 +59,16 @@ Read the vision in one pass: [`docs/vision.md`](docs/vision.md).
 - Keep org and candidate surfaces in one web app (different modes), per medium/auth.
 - Anon session → Auth0 merge for likes, reports, and location (see auth.md).
 - Follow [docs/build-order.md](docs/build-order.md) / [plans/execution-order.md](plans/execution-order.md): skeleton → Auth0 → org spine → pre-event → day-of.
+
+## Before creating or updating a pull request
+
+1. Run `bun run format` from the repository root. This must format the entire supported codebase
+   with Biome, not only the files changed in the current task.
+2. Run `bun run ci` and fix every failure before pushing. The command explicitly verifies Biome
+   formatting, lint rules, import organization, TypeScript, tests, dependency security, and the
+   production build.
+3. Do not create or update a pull request while either command reports a failure. GitHub CI and
+   Vercel enforce the same Biome formatting gate.
 
 ## Out of scope unless asked
 

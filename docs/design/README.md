@@ -23,7 +23,8 @@ Everything in this system is an attempt to make that image into a product rather
 | Doc | What it settles |
 |-----|-----------------|
 | [field.md](field.md) | **Start here.** The dithered light field — recipe, parameters, how convergence carries state |
-| [proof/field-renderer.js](proof/field-renderer.js) | The field itself. Dependency-free ES module; the app imports this, not a copy of it |
+| [`src/lib/field/renderer.js`](../../src/lib/field/renderer.js) | The field itself. Dependency-free ES module; the app imports this, not a copy of it |
+| [ui-kit.md](ui-kit.md) | shadcn/ui + Tailwind v4, and what had to be restyled to honour the system |
 | [color.md](color.md) | The luminance ladder, and the strict budget on hue |
 | [type.md](type.md) | Kanit, Schibsted Grotesk, Martian Mono — scale and rules |
 | [form.md](form.md) | Radius, space, layout, elevation without shadow |

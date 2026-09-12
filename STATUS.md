@@ -16,11 +16,18 @@ Snapshot for agents working from this repo. Product detail lives under `docs/` a
 
 ## In progress
 
-- [ ] **Design system** — foundation written, pending sign-off ([docs/design/](docs/design/README.md))
+- [ ] **Design system** — wired into the app, pending sign-off ([docs/design/](docs/design/README.md))
   - Locked: Kanit / Schibsted Grotesk / Martian Mono; true `#000` with hue only where functional; `ign` dither; field convergence carries product state
-  - The field is isolated in [field-renderer.js](docs/design/proof/field-renderer.js) — dependency-free ES module, ready to import
-  - Tune by eye in [proof/field.html](docs/design/proof/field.html) (`cd docs/design && npx serve`)
+  - Tokens live in [globals.css](src/app/globals.css); shadcn defaults restyled ([ui-kit.md](docs/design/ui-kit.md))
+  - The field is [src/lib/field/renderer.js](src/lib/field/renderer.js) — one implementation, imported by both the app and the tuning harness
+  - Tune by eye in [proof/field.html](docs/design/proof/field.html) (`npx serve` from the repo root)
   - Open before build: Tier 2 / Tier 3, baked fallbacks, text scrim ([field.md §12](docs/design/field.md))
+
+- [ ] **Landing page** — built on the design system ([src/app/page.tsx](src/app/page.tsx))
+  - Loader → Hero (code entry) → Find → Before → Organizations → Open source → Footer
+  - One fixed field behind the whole page; scroll drives its convergence
+  - **Blocker:** the open-source section claims AGPL-3.0 but there is no `LICENSE` file — add it via GitHub's licence picker before this ships
+  - Open: event-code alphabet (exclude `0/O`, `1/I/l`), code-lookup rate limiting, organizer sign-in route, privacy/terms pages
 
 ## Next
 

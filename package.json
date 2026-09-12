@@ -6,7 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "check": "biome check .",
+    "check:ci": "biome ci .",
+    "check:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test --pass-with-no-tests",
+    "audit": "bun audit --prod --audit-level=high",
+    "ci": "bun run format:check && bun run check:ci && bun run typecheck && bun run test && bun run audit && bun run build"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -30,12 +40,11 @@
     "zod": "^4.6.2"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.13",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^22.20.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.3.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
