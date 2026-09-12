@@ -57,6 +57,17 @@ Read the vision in one pass: [`docs/vision.md`](docs/vision.md).
 - Perfect indoor positioning / BLE
 - Expanding login providers beyond Google
 
+## Agent skills (in-repo)
+
+Installed under [`.cursor/skills/`](.cursor/skills/). Invoke with `/skill-name` in Cursor.
+
+| Skill | When to use |
+|-------|-------------|
+| [`/i-have-adhd`](.cursor/skills/i-have-adhd/SKILL.md) | Response style — lead with the next action, number steps, restate state; stays on until “stop adhd mode” |
+| [`/grill-me`](.cursor/skills/grill-me/SKILL.md) | User-invoked plan grilling — stress-tests a design/plan (calls [`grilling`](.cursor/skills/grilling/SKILL.md)) |
+
+Also present: [`frontend-design`](.cursor/skills/frontend-design/SKILL.md) for UI work.
+
 ## Status snapshot
 
 UX definition is **locked** through day-of. Next phase is **execution** (implementation), guided by this file and `docs/INDEX.md`.
