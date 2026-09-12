@@ -1,19 +1,13 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 type EventShellPageProps = {
-  params: Promise<{ eventSlug: string }>
-}
+  params: Promise<{ eventSlug: string }>;
+};
 
 export default async function EventShellPage({ params }: EventShellPageProps) {
-  const { eventSlug } = await params
+  const { eventSlug } = await params;
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-6 py-12">
@@ -51,5 +45,5 @@ export default async function EventShellPage({ params }: EventShellPageProps) {
         </Card>
       </div>
     </main>
-  )
+  );
 }

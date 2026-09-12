@@ -42,12 +42,20 @@ We’re **not** building a recommendation engine or another Discord. The goal is
 Product definition through day-of is locked. **Next.js + Tailwind + shadcn skeleton is in-repo** (bun). Next: Auth0.
 
 ```bash
-bun install
+bun install --frozen-lockfile
 bun dev      # Next runs on Node via package scripts
+bun run ci   # Biome, types, tests, dependency audit, production build
 bun run build
 ```
 
 Vercel: install with bun `1.4.2` (see `vercel.json`); `build` is `next build` on Node (not `bun --bun`).
+
+## Delivery pipeline
+
+Every pull request and push to `main` runs the same frozen-lockfile quality gate used by Vercel:
+Biome formatting/lint/import checks, TypeScript, tests, a high-severity production dependency
+audit, and the Next.js production build. See [docs/ci-cd.md](docs/ci-cd.md) for local commands and
+the one-time branch-protection settings.
 
 
 ## Learn more
