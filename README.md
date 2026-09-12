@@ -48,7 +48,8 @@ bun run ci   # Biome, types, tests, dependency audit, production build
 bun run build
 ```
 
-Vercel: install with bun `1.4.2` (see `vercel.json`); `build` is `next build` on Node (not `bun --bun`).
+Vercel: install with Bun `1.4.2` through `bunx` (see `vercel.json`); `build` is `next build` on Node
+(not `bun --bun`).
 
 ## Delivery pipeline
 

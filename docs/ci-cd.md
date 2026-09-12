@@ -45,8 +45,8 @@ Also disable direct pushes to `main` so a pull request cannot bypass the checks.
 
 Vercel remains the deployment provider described in the stack documentation. Its Git integration
 creates previews for branches and production deployments from `main`. `vercel.json` runs
-`bun run ci` as the build command, so Biome, types, tests, the dependency audit, and the production
-build all pass before Vercel can publish a deployment.
+the exact Bun 1.4.2 binary through `bunx` for both install and `bun run ci`, so Biome, types, tests,
+the dependency audit, and the production build all pass before Vercel can publish a deployment.
 
 Keep the Vercel project connected to `Meet2304/converge`, with `main` selected as the production
 branch. No GitHub deployment secrets are required for this Git-based delivery path.
