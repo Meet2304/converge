@@ -125,17 +125,34 @@
 
 ---
 
-## 7. Implementation reading order (agents)
+## 7. Design system
+
+| ID | Concept | Status | Detail |
+|----|---------|--------|--------|
+| 7.1 | Dithered light field; convergence carries state | [L] | [design/field.md](design/field.md) |
+| 7.2 | Field renderer — import, do not reimplement | [L] | [design/proof/field-renderer.js](design/proof/field-renderer.js) |
+| 7.3 | Ground `#000`; hue only destructive + confirmed | [L] | [design/color.md](design/color.md) |
+| 7.4 | Kanit / Schibsted Grotesk / Martian Mono | [L] | [design/type.md](design/type.md) |
+| 7.5 | Radius encodes surface weight; no shadows | [L] | [design/form.md](design/form.md) |
+| 7.6 | Two motion domains; one moment per route | [L] | [design/motion.md](design/motion.md) |
+| 7.7 | morphicons (two-state) vs animate-ui (feedback) | [L] | [design/icons.md](design/icons.md) |
+| 7.8 | Field convergence as day-of warmer/colder | [L] | [design/field.md](design/field.md) §4.1 · §6 |
+| 7.9 | Tier 2 panels, Tier 3 hairline, baked fallbacks | Open | [design/field.md](design/field.md) §12 |
+
+---
+
+## 8. Implementation reading order (agents)
 
 1. [../AGENTS.md](../AGENTS.md)  
 2. [vision.md](vision.md)  
 3. This [INDEX.md](INDEX.md) — jump by ID  
 4. Domain SoTs: [auth.md](auth.md) → [onboarding.md](onboarding.md) → [medium.md](medium.md) → [pre-hackathon.md](pre-hackathon.md) → [day-of.md](day-of.md)  
-5. Build only what the active task needs; do not implement deferred `[D]` items unless asked  
+5. Visual language: [design/README.md](design/README.md) → [design/field.md](design/field.md)  
+6. Build only what the active task needs; do not implement deferred `[D]` items unless asked  
 
 ---
 
-## 8. Quick “where is X?”
+## 9. Quick “where is X?”
 
 | Looking for… | Go to |
 |--------------|--------|
@@ -144,4 +161,6 @@
 | Next.js / web vs app | §1 · [medium.md](medium.md) |
 | Likes / match / teams | §5 · [pre-hackathon.md](pre-hackathon.md) |
 | Map / finder / geofence | §6 · [day-of.md](day-of.md) |
+| Colors, type, radius, motion | §7 · [design/README.md](design/README.md) |
+| The header gradient / how to build it | §7.1 · [design/field.md](design/field.md) |
 | “Don’t build recommendations” | §0.4 · [project-context.md](project-context.md) |

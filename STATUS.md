@@ -12,6 +12,14 @@ Snapshot for agents working from this repo. Product detail lives under `docs/` a
 - [x] **Day-of UX** — locked, map-first ([docs/day-of.md](docs/day-of.md))
 - [x] **GitHub twin** — [Meet2304/converge](https://github.com/Meet2304/converge) exists; keep content in sync with this repo
 
+## In progress
+
+- [ ] **Design system** — foundation written, pending sign-off ([docs/design/](docs/design/README.md))
+  - Locked: Kanit / Schibsted Grotesk / Martian Mono; true `#000` with hue only where functional; `ign` dither; field convergence carries product state
+  - The field is isolated in [field-renderer.js](docs/design/proof/field-renderer.js) — dependency-free ES module, ready to import
+  - Tune by eye in [proof/field.html](docs/design/proof/field.html) (`cd docs/design && npx serve`)
+  - Open before build: Tier 2 / Tier 3, baked fallbacks, text scrim ([field.md §12](docs/design/field.md))
+
 ## Next
 
 - [ ] Execution — build plan / first Next.js slice

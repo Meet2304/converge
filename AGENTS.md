@@ -21,6 +21,7 @@ Read the vision in one pass: [`docs/vision.md`](docs/vision.md).
 | 7 | [`docs/day-of.md`](docs/day-of.md) | Map-first, privacy, finder, pins, geofence |
 | 8 | [`docs/ux-brainstorm.md`](docs/ux-brainstorm.md) | Phase status checklist |
 | 9 | [`docs/project-context.md`](docs/project-context.md) | Process-optimization framing |
+| 10 | [`docs/design/`](docs/design/README.md) | **Visual language** — color, type, radius, motion, icons, the dithered field |
 
 **Conflict rule:** Locked docs above win over chat history, README drafts, or assumptions. To change product behavior, update the relevant locked doc (or ask the user) — do not silently diverge in code.
 
@@ -42,6 +43,7 @@ Read the vision in one pass: [`docs/vision.md`](docs/vision.md).
 - **Pre-event:** single-scroll event page; likes without like-cap; mutual → match UI; teams + group chat; one team per event at a time.
 - **Day-of:** map-first when org enables location; **Join before share location**; teamed users see **teammates only**; finder needs **want to be found**; in-app notifications only; hybrid geofence (warn + hide outside buffer).
 - **Do not** build recommendation/ranking engines, native-required flows, email/push, or Discord-clone global channels unless docs are updated.
+- **Visual language:** true `#000` ground, no shadows, hue only for destructive and confirmed state, Kanit never below 16px. The dithered field is imported from [`docs/design/proof/field-renderer.js`](docs/design/proof/field-renderer.js) — do not reimplement it. See [`docs/design/`](docs/design/README.md).
 
 ## Implementation notes
 
