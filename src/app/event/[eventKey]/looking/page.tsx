@@ -1,36 +1,34 @@
-import Link from "next/link"
-import { notFound } from "next/navigation"
-import { likeParticipation } from "@/app/actions/social"
-import { setLooking } from "@/app/actions/join"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { getRequestContext } from "@/lib/auth/context"
-import { displayLabel } from "@/lib/display"
-import { getEventByKey, getMyParticipation } from "@/lib/db/events"
-import { createAdminClient } from "@/lib/supabase/admin"
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { setLooking } from "@/app/actions/join";
+import { likeParticipation } from "@/app/actions/social";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getRequestContext } from "@/lib/auth/context";
+import { getEventByKey, getMyParticipation } from "@/lib/db/events";
+import { displayLabel } from "@/lib/display";
+import { createAdminClient } from "@/lib/supabase/admin";
 
-export default async function LookingPage({
-  params,
-}: {
-  params: Promise<{ eventKey: string }>
-}) {
-  const { eventKey } = await params
-  const event = await getEventByKey(eventKey)
-  if (!event) notFound()
-  const ctx = await getRequestContext()
+export default async function LookingPage({ params }: { params: Promise<{ eventKey: string }> }) {
+  const { eventKey } = await params;
+  const event = await getEventByKey(eventKey);
+  if (!event) notFound();
+  const ctx = await getRequestContext();
   const mine = await getMyParticipation(event.id, {
     userId: ctx.user?.id,
     anonSessionId: ctx.anonSessionId,
-  })
+  });
 
-  const db = createAdminClient()
+  const db = createAdminClient();
   const { data: looking } = await db
     .from("participations")
-    .select("id, nickname, avatar_url, role, experience, desired_team_size, bio, looking, current_team_id, created_at, teams(name, team_members(participation_id))")
+    .select(
+      "id, nickname, avatar_url, role, experience, desired_team_size, bio, looking, current_team_id, created_at, teams(name, team_members(participation_id))",
+    )
     .eq("event_id", event.id)
     .eq("looking", true)
     .order("created_at", { ascending: false })
-    .limit(60)
+    .limit(60);
 
   const { data: myLikes } = mine
     ? await db
@@ -38,10 +36,10 @@ export default async function LookingPage({
         .select("to_participation_id")
         .eq("event_id", event.id)
         .eq("from_participation_id", mine.id)
-    : { data: [] as { to_participation_id: string }[] }
+    : { data: [] as { to_participation_id: string }[] };
 
-  const liked = new Set((myLikes ?? []).map((l) => l.to_participation_id))
-  const signedIn = Boolean(ctx.user)
+  const liked = new Set((myLikes ?? []).map((l) => l.to_participation_id));
+  const signedIn = Boolean(ctx.user);
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-10">
@@ -51,7 +49,11 @@ export default async function LookingPage({
           <h1 className="text-3xl font-semibold tracking-tight">Looking</h1>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" nativeButton={false} render={<Link href={`/event/${event.share_code}`} />}>
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<Link href={`/event/${event.share_code}`} />}
+          >
             Event
           </Button>
           {!mine ? (
@@ -74,13 +76,14 @@ export default async function LookingPage({
         {(looking ?? [])
           .filter((p) => p.id !== mine?.id)
           .map((p, index) => {
-            const team = p.teams as unknown as
-              | { name: string; team_members: { participation_id: string }[] }
-              | null
+            const team = p.teams as unknown as {
+              name: string;
+              team_members: { participation_id: string }[];
+            } | null;
             const needs =
               team && event.max_team_size
                 ? Math.max(event.max_team_size - (team.team_members?.length ?? 0), 0)
-                : null
+                : null;
             return (
               <Card key={p.id} className="border-white/10">
                 <CardHeader className="flex flex-row items-start justify-between gap-4">
@@ -119,9 +122,9 @@ export default async function LookingPage({
                   <CardContent className="text-sm text-muted-foreground">{p.bio}</CardContent>
                 ) : null}
               </Card>
-            )
+            );
           })}
       </div>
     </main>
-  )
+  );
 }

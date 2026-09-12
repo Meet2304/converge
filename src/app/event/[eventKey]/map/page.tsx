@@ -1,25 +1,21 @@
-import Link from "next/link"
-import { notFound } from "next/navigation"
-import { MapCanvas } from "@/components/day-of/map-canvas"
-import { Button } from "@/components/ui/button"
-import { getRequestContext } from "@/lib/auth/context"
-import { getEventByKey, getMyParticipation } from "@/lib/db/events"
-import { createAdminClient } from "@/lib/supabase/admin"
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { MapCanvas } from "@/components/day-of/map-canvas";
+import { Button } from "@/components/ui/button";
+import { getRequestContext } from "@/lib/auth/context";
+import { getEventByKey, getMyParticipation } from "@/lib/db/events";
+import { createAdminClient } from "@/lib/supabase/admin";
 
-export default async function MapPage({
-  params,
-}: {
-  params: Promise<{ eventKey: string }>
-}) {
-  const { eventKey } = await params
-  const event = await getEventByKey(eventKey)
-  if (!event) notFound()
+export default async function MapPage({ params }: { params: Promise<{ eventKey: string }> }) {
+  const { eventKey } = await params;
+  const event = await getEventByKey(eventKey);
+  if (!event) notFound();
 
-  const ctx = await getRequestContext()
+  const ctx = await getRequestContext();
   const mine = await getMyParticipation(event.id, {
     userId: ctx.user?.id,
     anonSessionId: ctx.anonSessionId,
-  })
+  });
 
   if (!mine) {
     return (
@@ -30,24 +26,27 @@ export default async function MapPage({
           Join first
         </Button>
       </main>
-    )
+    );
   }
 
-  const db = createAdminClient()
+  const db = createAdminClient();
   const { data: peers } = await db
     .from("location_state")
-    .select("participation_id, last_lat, last_lng, want_to_be_found, sharing_enabled, participations!inner(nickname, current_team_id, event_id)")
+    .select(
+      "participation_id, last_lat, last_lng, want_to_be_found, sharing_enabled, participations!inner(nickname, current_team_id, event_id)",
+    )
     .eq("sharing_enabled", true)
     .eq("want_to_be_found", true)
-    .not("last_lat", "is", null)
+    .not("last_lat", "is", null);
 
   const initialPeers = (peers ?? [])
     .filter((p) => (p.participations as unknown as { event_id: string }).event_id === event.id)
     .filter((p) => p.participation_id !== mine.id)
     .filter((p) => {
-      const teamId = (p.participations as unknown as { current_team_id: string | null }).current_team_id
-      if (mine.current_team_id) return teamId === mine.current_team_id
-      return true
+      const teamId = (p.participations as unknown as { current_team_id: string | null })
+        .current_team_id;
+      if (mine.current_team_id) return teamId === mine.current_team_id;
+      return true;
     })
     .map((p) => ({
       participationId: p.participation_id,
@@ -55,7 +54,7 @@ export default async function MapPage({
       lat: p.last_lat as number,
       lng: p.last_lng as number,
       teamId: (p.participations as unknown as { current_team_id: string | null }).current_team_id,
-    }))
+    }));
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-4 px-6 py-8">
@@ -64,7 +63,11 @@ export default async function MapPage({
           <p className="text-sm text-muted-foreground">{event.name}</p>
           <h1 className="text-3xl font-semibold tracking-tight">Map</h1>
         </div>
-        <Button variant="outline" nativeButton={false} render={<Link href={`/event/${event.share_code}`} />}>
+        <Button
+          variant="outline"
+          nativeButton={false}
+          render={<Link href={`/event/${event.share_code}`} />}
+        >
           Event
         </Button>
       </div>
@@ -84,5 +87,5 @@ export default async function MapPage({
         initialPeers={initialPeers}
       />
     </main>
-  )
+  );
 }

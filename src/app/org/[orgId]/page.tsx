@@ -1,46 +1,43 @@
-import Link from "next/link"
-import { notFound, redirect } from "next/navigation"
-import { createEvent } from "@/app/actions/org"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { requireUser } from "@/lib/auth/context"
-import { createAdminClient } from "@/lib/supabase/admin"
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { createEvent } from "@/app/actions/org";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { requireUser } from "@/lib/auth/context";
+import type { SessionUser } from "@/lib/auth/types";
+import { createAdminClient } from "@/lib/supabase/admin";
 
-export default async function OrgDetailPage({
-  params,
-}: {
-  params: Promise<{ orgId: string }>
-}) {
-  const { orgId } = await params
-  let user
+export default async function OrgDetailPage({ params }: { params: Promise<{ orgId: string }> }) {
+  const { orgId } = await params;
+  let user: SessionUser;
   try {
-    user = await requireUser()
+    user = await requireUser();
   } catch {
-    redirect(`/?login=1&returnTo=/org/${orgId}`)
+    redirect(`/?login=1&returnTo=/org/${orgId}`);
   }
 
-  const db = createAdminClient()
+  const db = createAdminClient();
   const { data: membership } = await db
     .from("org_memberships")
     .select("role, organizations(*)")
     .eq("org_id", orgId)
     .eq("user_id", user.id)
-    .maybeSingle()
-  if (!membership) notFound()
+    .maybeSingle();
+  if (!membership) notFound();
 
-  const org = membership.organizations as unknown as { id: string; name: string; slug: string }
+  const org = membership.organizations as unknown as { id: string; name: string; slug: string };
   const { data: events } = await db
     .from("events")
     .select("id, name, share_code, starts_at, map_enabled, looking_opens_at")
     .eq("org_id", orgId)
-    .order("starts_at", { ascending: false })
+    .order("starts_at", { ascending: false });
 
-  const now = new Date()
-  const startDefault = new Date(now.getTime() + 86400000).toISOString().slice(0, 16)
-  const endDefault = new Date(now.getTime() + 86400000 * 2).toISOString().slice(0, 16)
+  const now = new Date();
+  const startDefault = new Date(now.getTime() + 86400000).toISOString().slice(0, 16);
+  const endDefault = new Date(now.getTime() + 86400000 * 2).toISOString().slice(0, 16);
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-6 py-10">
@@ -66,10 +63,17 @@ export default async function OrgDetailPage({
                 </CardDescription>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" nativeButton={false} render={<Link href={`/event/${ev.share_code}`} />}>
+                <Button
+                  variant="outline"
+                  nativeButton={false}
+                  render={<Link href={`/event/${ev.share_code}`} />}
+                >
                   Public
                 </Button>
-                <Button nativeButton={false} render={<Link href={`/org/${orgId}/events/${ev.id}`} />}>
+                <Button
+                  nativeButton={false}
+                  render={<Link href={`/org/${orgId}/events/${ev.id}`} />}
+                >
                   Manage
                 </Button>
               </div>
@@ -111,17 +115,34 @@ export default async function OrgDetailPage({
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="grid gap-1.5">
                 <Label htmlFor="startsAt">Starts</Label>
-                <Input id="startsAt" name="startsAt" type="datetime-local" defaultValue={startDefault} required />
+                <Input
+                  id="startsAt"
+                  name="startsAt"
+                  type="datetime-local"
+                  defaultValue={startDefault}
+                  required
+                />
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor="endsAt">Ends</Label>
-                <Input id="endsAt" name="endsAt" type="datetime-local" defaultValue={endDefault} required />
+                <Input
+                  id="endsAt"
+                  name="endsAt"
+                  type="datetime-local"
+                  defaultValue={endDefault}
+                  required
+                />
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="grid gap-1.5">
                 <Label htmlFor="lookingOpensAt">Looking opens</Label>
-                <Input id="lookingOpensAt" name="lookingOpensAt" type="datetime-local" defaultValue={startDefault} />
+                <Input
+                  id="lookingOpensAt"
+                  name="lookingOpensAt"
+                  type="datetime-local"
+                  defaultValue={startDefault}
+                />
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor="minTeamSize">Min team</Label>
@@ -141,5 +162,5 @@ export default async function OrgDetailPage({
         </CardContent>
       </Card>
     </main>
-  )
+  );
 }

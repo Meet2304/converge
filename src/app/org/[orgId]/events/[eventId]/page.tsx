@@ -1,63 +1,65 @@
-import Link from "next/link"
-import { notFound, redirect } from "next/navigation"
-import {
-  addTimelineItem,
-  addTrack,
-  resolveReport,
-  updateEventToggles,
-} from "@/app/actions/org"
-import { CopyButton } from "@/components/app/copy-button"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { requireUser } from "@/lib/auth/context"
-import { createAdminClient } from "@/lib/supabase/admin"
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { addTimelineItem, addTrack, resolveReport, updateEventToggles } from "@/app/actions/org";
+import { CopyButton } from "@/components/app/copy-button";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { requireUser } from "@/lib/auth/context";
+import type { SessionUser } from "@/lib/auth/types";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function ManageEventPage({
   params,
 }: {
-  params: Promise<{ orgId: string; eventId: string }>
+  params: Promise<{ orgId: string; eventId: string }>;
 }) {
-  const { orgId, eventId } = await params
-  let user
+  const { orgId, eventId } = await params;
+  let user: SessionUser;
   try {
-    user = await requireUser()
+    user = await requireUser();
   } catch {
-    redirect(`/?login=1&returnTo=/org/${orgId}/events/${eventId}`)
+    redirect(`/?login=1&returnTo=/org/${orgId}/events/${eventId}`);
   }
 
-  const db = createAdminClient()
+  const db = createAdminClient();
   const { data: membership } = await db
     .from("org_memberships")
     .select("role")
     .eq("org_id", orgId)
     .eq("user_id", user.id)
-    .maybeSingle()
-  if (!membership) notFound()
+    .maybeSingle();
+  if (!membership) notFound();
 
-  const { data: event } = await db.from("events").select("*").eq("id", eventId).eq("org_id", orgId).maybeSingle()
-  if (!event) notFound()
+  const { data: event } = await db
+    .from("events")
+    .select("*")
+    .eq("id", eventId)
+    .eq("org_id", orgId)
+    .maybeSingle();
+  if (!event) notFound();
 
   const { data: tracks } = await db
     .from("event_tracks")
     .select("*")
     .eq("event_id", eventId)
-    .order("sort_order")
+    .order("sort_order");
   const { data: timeline } = await db
     .from("event_timeline_items")
     .select("*")
     .eq("event_id", eventId)
-    .order("sort_order")
+    .order("sort_order");
   const { data: reports } = await db
     .from("reports")
     .select("*, target:participations!reports_target_participation_id_fkey(nickname)")
     .eq("event_id", eventId)
     .order("created_at", { ascending: false })
-    .limit(50)
+    .limit(50);
 
-  const origin = process.env.AUTH0_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-  const shareUrl = `${origin}/event/${event.share_code}`
+  const origin =
+    process.env.AUTH0_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const shareUrl = `${origin}/event/${event.share_code}`;
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-6 py-10">
@@ -119,21 +121,37 @@ export default async function ManageEventPage({
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="grid gap-1.5">
                 <Label htmlFor="mapCenterLat">Map center lat</Label>
-                <Input id="mapCenterLat" name="mapCenterLat" defaultValue={event.map_center_lat ?? 37.7749} />
+                <Input
+                  id="mapCenterLat"
+                  name="mapCenterLat"
+                  defaultValue={event.map_center_lat ?? 37.7749}
+                />
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor="mapCenterLng">Map center lng</Label>
-                <Input id="mapCenterLng" name="mapCenterLng" defaultValue={event.map_center_lng ?? -122.4194} />
+                <Input
+                  id="mapCenterLng"
+                  name="mapCenterLng"
+                  defaultValue={event.map_center_lng ?? -122.4194}
+                />
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="grid gap-1.5">
                 <Label htmlFor="geofenceRadiusM">Geofence warn (m)</Label>
-                <Input id="geofenceRadiusM" name="geofenceRadiusM" defaultValue={event.geofence_radius_m ?? 500} />
+                <Input
+                  id="geofenceRadiusM"
+                  name="geofenceRadiusM"
+                  defaultValue={event.geofence_radius_m ?? 500}
+                />
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor="geofenceHideRadiusM">Geofence hide (m)</Label>
-                <Input id="geofenceHideRadiusM" name="geofenceHideRadiusM" defaultValue={event.geofence_hide_radius_m ?? 800} />
+                <Input
+                  id="geofenceHideRadiusM"
+                  name="geofenceHideRadiusM"
+                  defaultValue={event.geofence_hide_radius_m ?? 800}
+                />
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -208,12 +226,20 @@ export default async function ManageEventPage({
                 {r.body ? <p className="mt-1 text-sm">{r.body}</p> : null}
                 <form action={resolveReport} className="mt-2 flex flex-wrap gap-2">
                   <input type="hidden" name="reportId" value={r.id} />
-                  <select name="status" defaultValue="resolved" className="h-8 rounded border border-input bg-background px-2 text-sm">
+                  <select
+                    name="status"
+                    defaultValue="resolved"
+                    className="h-8 rounded border border-input bg-background px-2 text-sm"
+                  >
                     <option value="reviewing">reviewing</option>
                     <option value="resolved">resolved</option>
                     <option value="dismissed">dismissed</option>
                   </select>
-                  <select name="moderationStatus" defaultValue="" className="h-8 rounded border border-input bg-background px-2 text-sm">
+                  <select
+                    name="moderationStatus"
+                    defaultValue=""
+                    className="h-8 rounded border border-input bg-background px-2 text-sm"
+                  >
                     <option value="">no user action</option>
                     <option value="warned">warn</option>
                     <option value="suspended">suspend</option>
@@ -229,5 +255,5 @@ export default async function ManageEventPage({
         </CardContent>
       </Card>
     </main>
-  )
+  );
 }

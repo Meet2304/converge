@@ -1,30 +1,27 @@
-import Link from "next/link"
-import { notFound, redirect } from "next/navigation"
-import { acceptInvite, createTeam } from "@/app/actions/team"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { requireUser } from "@/lib/auth/context"
-import { getEventByKey, getMyParticipation } from "@/lib/db/events"
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { acceptInvite, createTeam } from "@/app/actions/team";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { requireUser } from "@/lib/auth/context";
+import type { SessionUser } from "@/lib/auth/types";
+import { getEventByKey, getMyParticipation } from "@/lib/db/events";
 
-export default async function TeamIndexPage({
-  params,
-}: {
-  params: Promise<{ eventKey: string }>
-}) {
-  const { eventKey } = await params
-  const event = await getEventByKey(eventKey)
-  if (!event) notFound()
-  let user
+export default async function TeamIndexPage({ params }: { params: Promise<{ eventKey: string }> }) {
+  const { eventKey } = await params;
+  const event = await getEventByKey(eventKey);
+  if (!event) notFound();
+  let user: SessionUser;
   try {
-    user = await requireUser()
+    user = await requireUser();
   } catch {
-    redirect(`/?login=1&returnTo=/event/${eventKey}/team`)
+    redirect(`/?login=1&returnTo=/event/${eventKey}/team`);
   }
-  const mine = await getMyParticipation(event.id, { userId: user.id, anonSessionId: "" })
-  if (!mine) redirect(`/event/${event.share_code}/join`)
-  if (mine.current_team_id) redirect(`/event/${event.share_code}/team/${mine.current_team_id}`)
+  const mine = await getMyParticipation(event.id, { userId: user.id, anonSessionId: "" });
+  if (!mine) redirect(`/event/${event.share_code}/join`);
+  if (mine.current_team_id) redirect(`/event/${event.share_code}/team/${mine.current_team_id}`);
 
   return (
     <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 px-6 py-10">
@@ -57,9 +54,13 @@ export default async function TeamIndexPage({
           </form>
         </CardContent>
       </Card>
-      <Button variant="outline" nativeButton={false} render={<Link href={`/event/${event.share_code}`} />}>
+      <Button
+        variant="outline"
+        nativeButton={false}
+        render={<Link href={`/event/${event.share_code}`} />}
+      >
         Back
       </Button>
     </main>
-  )
+  );
 }

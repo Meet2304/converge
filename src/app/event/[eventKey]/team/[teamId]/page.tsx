@@ -1,45 +1,46 @@
-import Link from "next/link"
-import { notFound, redirect } from "next/navigation"
-import { createInvite, kickMember, leaveTeam, renameTeam } from "@/app/actions/team"
-import { CopyButton } from "@/components/app/copy-button"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { requireUser } from "@/lib/auth/context"
-import { getEventByKey, getMyParticipation } from "@/lib/db/events"
-import { createAdminClient } from "@/lib/supabase/admin"
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { createInvite, kickMember, leaveTeam, renameTeam } from "@/app/actions/team";
+import { CopyButton } from "@/components/app/copy-button";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { requireUser } from "@/lib/auth/context";
+import type { SessionUser } from "@/lib/auth/types";
+import { getEventByKey, getMyParticipation } from "@/lib/db/events";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function TeamDetailPage({
   params,
 }: {
-  params: Promise<{ eventKey: string; teamId: string }>
+  params: Promise<{ eventKey: string; teamId: string }>;
 }) {
-  const { eventKey, teamId } = await params
-  const event = await getEventByKey(eventKey)
-  if (!event) notFound()
-  let user
+  const { eventKey, teamId } = await params;
+  const event = await getEventByKey(eventKey);
+  if (!event) notFound();
+  let user: SessionUser;
   try {
-    user = await requireUser()
+    user = await requireUser();
   } catch {
-    redirect(`/?login=1&returnTo=/event/${eventKey}/team/${teamId}`)
+    redirect(`/?login=1&returnTo=/event/${eventKey}/team/${teamId}`);
   }
 
-  const db = createAdminClient()
+  const db = createAdminClient();
   const { data: team } = await db
     .from("teams")
     .select("*")
     .eq("id", teamId)
     .eq("event_id", event.id)
-    .maybeSingle()
-  if (!team || team.dissolved_at) notFound()
+    .maybeSingle();
+  if (!team || team.dissolved_at) notFound();
 
-  const mine = await getMyParticipation(event.id, { userId: user.id, anonSessionId: "" })
-  if (!mine) redirect(`/event/${event.share_code}/join`)
+  const mine = await getMyParticipation(event.id, { userId: user.id, anonSessionId: "" });
+  if (!mine) redirect(`/event/${event.share_code}/join`);
 
   const { data: members } = await db
     .from("team_members")
     .select("role, participation_id, participations(id, nickname, avatar_url)")
-    .eq("team_id", teamId)
+    .eq("team_id", teamId);
   const { data: invites } = await db
     .from("team_invites")
     .select("code, created_at, revoked_at, accepted_at")
@@ -47,17 +48,17 @@ export default async function TeamDetailPage({
     .is("revoked_at", null)
     .is("accepted_at", null)
     .order("created_at", { ascending: false })
-    .limit(5)
+    .limit(5);
   const { data: convo } = await db
     .from("conversations")
     .select("id")
     .eq("team_id", teamId)
     .eq("kind", "team")
-    .maybeSingle()
+    .maybeSingle();
 
-  const isCreator = team.creator_participation_id === mine.id
-  const onTeam = (members ?? []).some((m) => m.participation_id === mine.id)
-  const needs = Math.max(event.max_team_size - (members ?? []).length, 0)
+  const isCreator = team.creator_participation_id === mine.id;
+  const onTeam = (members ?? []).some((m) => m.participation_id === mine.id);
+  const needs = Math.max(event.max_team_size - (members ?? []).length, 0);
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-6 py-10">
@@ -71,7 +72,10 @@ export default async function TeamDetailPage({
           </p>
         </div>
         {convo ? (
-          <Button nativeButton={false} render={<Link href={`/event/${event.share_code}/chat/${convo.id}`} />}>
+          <Button
+            nativeButton={false}
+            render={<Link href={`/event/${event.share_code}/chat/${convo.id}`} />}
+          >
             Team chat
           </Button>
         ) : null}
@@ -83,7 +87,11 @@ export default async function TeamDetailPage({
         </CardHeader>
         <CardContent className="grid gap-2">
           {(members ?? []).map((m) => {
-            const p = m.participations as unknown as { id: string; nickname: string; avatar_url: string }
+            const p = m.participations as unknown as {
+              id: string;
+              nickname: string;
+              avatar_url: string;
+            };
             return (
               <div key={p.id} className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
@@ -103,7 +111,7 @@ export default async function TeamDetailPage({
                   </form>
                 ) : null}
               </div>
-            )
+            );
           })}
         </CardContent>
       </Card>
@@ -149,17 +157,21 @@ export default async function TeamDetailPage({
         <form action={leaveTeam} className="grid gap-2">
           <input type="hidden" name="teamId" value={teamId} />
           {isCreator && (members ?? []).length > 1 ? (
-            <select name="transferTo" className="h-9 rounded-lg border border-input bg-background px-2 text-sm" required>
+            <select
+              name="transferTo"
+              className="h-9 rounded-lg border border-input bg-background px-2 text-sm"
+              required
+            >
               <option value="">Transfer creator to…</option>
               {(members ?? [])
                 .filter((m) => m.participation_id !== mine.id)
                 .map((m) => {
-                  const p = m.participations as unknown as { id: string; nickname: string }
+                  const p = m.participations as unknown as { id: string; nickname: string };
                   return (
                     <option key={p.id} value={p.id}>
                       {p.nickname}
                     </option>
-                  )
+                  );
                 })}
             </select>
           ) : null}
@@ -169,5 +181,5 @@ export default async function TeamDetailPage({
         </form>
       ) : null}
     </main>
-  )
+  );
 }

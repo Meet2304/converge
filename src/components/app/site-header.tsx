@@ -1,10 +1,10 @@
-import Link from "next/link"
-import { getSession } from "@/lib/auth/session"
-import { Button } from "@/components/ui/button"
-import { DevLoginButton } from "@/components/app/dev-login-button"
+import Link from "next/link";
+import { DevLoginButton } from "@/components/app/dev-login-button";
+import { Button } from "@/components/ui/button";
+import { getSession } from "@/lib/auth/session";
 
 export async function SiteHeader() {
-  const session = await getSession()
+  const session = await getSession();
   return (
     <header className="flex items-center justify-between gap-4 border-b border-white/10 px-6 py-4">
       <Link href="/" className="text-lg font-semibold tracking-tight">
@@ -19,7 +19,11 @@ export async function SiteHeader() {
             <span className="hidden text-sm text-muted-foreground sm:inline">
               {session.user.displayName || session.user.email}
             </span>
-            <Button variant="outline" nativeButton={false} render={<Link href="/api/auth/logout" />}>
+            <Button
+              variant="outline"
+              nativeButton={false}
+              render={<Link href="/api/auth/logout" />}
+            >
               Sign out
             </Button>
           </>
@@ -28,5 +32,5 @@ export async function SiteHeader() {
         )}
       </nav>
     </header>
-  )
+  );
 }

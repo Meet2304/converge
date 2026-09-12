@@ -1,39 +1,39 @@
-import Link from "next/link"
-import { notFound } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { getRequestContext } from "@/lib/auth/context"
-import { getEventByKey, getMyParticipation } from "@/lib/db/events"
-import { createAdminClient } from "@/lib/supabase/admin"
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getRequestContext } from "@/lib/auth/context";
+import { getEventByKey, getMyParticipation } from "@/lib/db/events";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function EventPublicPage({
   params,
 }: {
-  params: Promise<{ eventKey: string }>
+  params: Promise<{ eventKey: string }>;
 }) {
-  const { eventKey } = await params
-  const event = await getEventByKey(eventKey)
-  if (!event) notFound()
+  const { eventKey } = await params;
+  const event = await getEventByKey(eventKey);
+  if (!event) notFound();
 
-  const ctx = await getRequestContext()
+  const ctx = await getRequestContext();
   const mine = await getMyParticipation(event.id, {
     userId: ctx.user?.id,
     anonSessionId: ctx.anonSessionId,
-  })
+  });
 
-  const db = createAdminClient()
+  const db = createAdminClient();
   const { data: timeline } = await db
     .from("event_timeline_items")
     .select("*")
     .eq("event_id", event.id)
-    .order("sort_order")
+    .order("sort_order");
   const { data: tracks } = await db
     .from("event_tracks")
     .select("*")
     .eq("event_id", event.id)
-    .order("sort_order")
+    .order("sort_order");
 
-  const tracksVisible = Boolean(event.tracks_published_at)
+  const tracksVisible = Boolean(event.tracks_published_at);
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-6 py-10">
@@ -55,11 +55,16 @@ export default async function EventPublicPage({
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>
-            {new Date(event.starts_at).toLocaleString()} → {new Date(event.ends_at).toLocaleString()} ({event.timezone})
+            {new Date(event.starts_at).toLocaleString()} →{" "}
+            {new Date(event.ends_at).toLocaleString()} ({event.timezone})
           </p>
-          <p>Team size {event.min_team_size}–{event.max_team_size}</p>
+          <p>
+            Team size {event.min_team_size}–{event.max_team_size}
+          </p>
           <p>Looking opens {new Date(event.looking_opens_at).toLocaleString()}</p>
-          {event.long_description ? <p className="whitespace-pre-wrap text-foreground">{event.long_description}</p> : null}
+          {event.long_description ? (
+            <p className="whitespace-pre-wrap text-foreground">{event.long_description}</p>
+          ) : null}
         </CardContent>
       </Card>
 
@@ -70,7 +75,9 @@ export default async function EventPublicPage({
             {(timeline ?? []).map((t) => (
               <li key={t.id} className="flex justify-between gap-4 border-b border-white/5 py-2">
                 <span>{t.label}</span>
-                <span className="text-muted-foreground">{new Date(t.occurs_at).toLocaleString()}</span>
+                <span className="text-muted-foreground">
+                  {new Date(t.occurs_at).toLocaleString()}
+                </span>
               </li>
             ))}
           </ul>
@@ -96,20 +103,32 @@ export default async function EventPublicPage({
         <Button nativeButton={false} render={<Link href={`/event/${event.share_code}/join`} />}>
           {mine ? "Edit Join profile" : "Join"}
         </Button>
-        <Button variant="outline" nativeButton={false} render={<Link href={`/event/${event.share_code}/looking`} />}>
+        <Button
+          variant="outline"
+          nativeButton={false}
+          render={<Link href={`/event/${event.share_code}/looking`} />}
+        >
           Looking
         </Button>
         {event.map_enabled ? (
-          <Button variant="outline" nativeButton={false} render={<Link href={`/event/${event.share_code}/map`} />}>
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<Link href={`/event/${event.share_code}/map`} />}
+          >
             Map
           </Button>
         ) : null}
         {mine?.current_team_id ? (
-          <Button variant="secondary" nativeButton={false} render={<Link href={`/event/${event.share_code}/team/${mine.current_team_id}`} />}>
+          <Button
+            variant="secondary"
+            nativeButton={false}
+            render={<Link href={`/event/${event.share_code}/team/${mine.current_team_id}`} />}
+          >
             My team
           </Button>
         ) : null}
       </div>
     </main>
-  )
+  );
 }
