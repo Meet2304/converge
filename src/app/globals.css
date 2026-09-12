@@ -4,12 +4,146 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ---------------------------------------------------------------------------
+   Converge design tokens — docs/design/
+   The ground is #000000, not a tinted near-black: the field's beams have to
+   read as emitted light, and light emitted onto dark grey reads as ink.
+--------------------------------------------------------------------------- */
+
+:root {
+  /* Ground — color.md §1 */
+  --void: #000000;
+  --surface: #101010;
+  --raised: #1a1a1a;
+
+  /* Text ladder. Nothing below --ink-3 carries information. */
+  --ink-1: #f2f2f2; /* 18.8:1 */
+  --ink-2: #a8a8a8; /*  8.8:1 */
+  --ink-3: #787878; /*  4.8:1 — AA floor */
+  --ink-4: #5a5a5a; /*  3.0:1 — disabled / decorative only */
+
+  /* Lines are alpha so they compose over surface, raised and the field. */
+  --line-quiet: rgb(255 255 255 / 0.07);
+  --line: rgb(255 255 255 / 0.14);
+  --line-loud: rgb(255 255 255 / 0.28);
+
+  /* Hue is functional only — color.md §2, seven rules. Never brand. */
+  --danger: #ff4438;
+  --danger-quiet: rgb(255 68 56 / 0.12);
+  --success: #35d68a;
+  --success-quiet: rgb(53 214 138 / 0.12);
+
+  /* Radius encodes surface weight — form.md §1. Not one value. */
+  --r-0: 0px;
+  --r-1: 6px;
+  --r-2: 10px;
+  --r-3: 16px;
+  --r-4: 24px;
+  --r-full: 9999px;
+
+  /* Motion — motion.md §1–2. Light arrives fast and settles slowly. */
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-cross: cubic-bezier(0.4, 0, 0.2, 1);
+  --t-1: 120ms;
+  --t-2: 200ms;
+  --t-3: 320ms;
+  --t-4: 480ms;
+
+  /* shadcn semantic mapping. Dark-only product: :root and .dark match, so
+     there is no light-mode flash before the class lands. */
+  --background: var(--void);
+  --foreground: var(--ink-1);
+  --card: var(--surface);
+  --card-foreground: var(--ink-1);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink-1);
+  --primary: var(--ink-1);
+  --primary-foreground: var(--void);
+  --secondary: var(--raised);
+  --secondary-foreground: var(--ink-1);
+  --muted: var(--raised);
+  --muted-foreground: var(--ink-2);
+  --accent: var(--raised);
+  --accent-foreground: var(--ink-1);
+  --destructive: var(--danger);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--ink-1);
+  --radius: var(--r-3);
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--ink-1);
+  --sidebar-primary: var(--ink-1);
+  --sidebar-primary-foreground: var(--void);
+  --sidebar-accent: var(--raised);
+  --sidebar-accent-foreground: var(--ink-1);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--ink-1);
+}
+
+.dark {
+  --background: var(--void);
+  --foreground: var(--ink-1);
+  --card: var(--surface);
+  --card-foreground: var(--ink-1);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink-1);
+  --primary: var(--ink-1);
+  --primary-foreground: var(--void);
+  --secondary: var(--raised);
+  --secondary-foreground: var(--ink-1);
+  --muted: var(--raised);
+  --muted-foreground: var(--ink-2);
+  --accent: var(--raised);
+  --accent-foreground: var(--ink-1);
+  --destructive: var(--danger);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--ink-1);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-void: var(--void);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-ink: var(--ink-1);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+  --color-line: var(--line);
+  --color-line-quiet: var(--line-quiet);
+  --color-line-loud: var(--line-loud);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+
+  --font-display: var(--font-display);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --radius-none: var(--r-0);
+  --radius-sm: var(--r-1);
+  --radius-md: var(--r-2);
+  --radius-lg: var(--r-3);
+  --radius-xl: var(--r-4);
+  --radius-2xl: var(--r-4);
+  --radius-3xl: var(--r-4);
+  --radius-4xl: var(--r-4);
+
+  /* No shadows anywhere — form.md §4. On a #000 ground a drop shadow is
+     invisible or an obvious fake; elevation is a luminance step plus a
+     hairline. Zeroing the values leaves focus rings working. */
+  --shadow-2xs: 0 0 #0000;
+  --shadow-xs: 0 0 #0000;
+  --shadow-sm: 0 0 #0000;
+  --shadow: 0 0 #0000;
+  --shadow-md: 0 0 #0000;
+  --shadow-lg: 0 0 #0000;
+  --shadow-xl: 0 0 #0000;
+  --shadow-2xl: 0 0 #0000;
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -18,11 +152,6 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -39,92 +168,221 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+/* ---------------------------------------------------------------------------
+   Type scale — type.md §3.
+   Kanit never renders below 16px. Below that the job passes to Schibsted.
+--------------------------------------------------------------------------- */
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+@layer components {
+  .display-xl {
+    font-family: var(--font-display);
+    font-weight: 200;
+    font-size: clamp(44px, 9vw, 96px);
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+  }
+  .display-l {
+    font-family: var(--font-display);
+    font-weight: 200;
+    font-size: clamp(34px, 6vw, 64px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .display-m {
+    font-family: var(--font-display);
+    font-weight: 200;
+    font-size: clamp(28px, 4.4vw, 44px);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+  }
+  .heading-l {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(24px, 3vw, 30px);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+  }
+  .heading-m {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+  .heading-s {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.3;
+  }
+  .body-l {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 1.55;
+  }
+  .body {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .body-s {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .label {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 1.2;
+  }
+  .code-l {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: clamp(18px, 4vw, 24px);
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+  }
+  .code {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+  }
+  /* Measure ceiling for Schibsted body text — type.md §4. */
+  .measure {
+    max-width: 62ch;
+  }
+
+  /* Field.md §7: luminance under body text never exceeds 0.35. The field is
+     a background and has to lose to text every time. This is the scrim the
+     spec prefers over relying on placement alone. */
+  .text-scrim {
+    position: relative;
+  }
+  .text-scrim::before {
+    content: "";
+    position: absolute;
+    inset: -10% -14%;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse at 40% 50%,
+      rgb(0 0 0 / 0.82),
+      rgb(0 0 0 / 0.55) 45%,
+      transparent 75%
+    );
+  }
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    background: var(--void);
+    color: var(--ink-1);
   }
-  html {
-    @apply font-sans;
+  /* White, 2px, offset 2px — color.md §4. Never coloured, never removed. */
+  :focus-visible {
+    outline: 2px solid var(--ink-1);
+    outline-offset: 2px;
+  }
+}
+
+/* A person on the venue map. Slow and shallow — presence, not a beacon. */
+@keyframes pulse-point {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+}
+
+/* A new joiner arriving at the top of the Looking list. */
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    background-color: rgb(255 255 255 / 0.06);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    background-color: transparent;
+  }
+}
+
+/* The two of you closing on each other. The brand metaphor, executed at
+   component scale so the page behind it stays readable. */
+@keyframes converge-left {
+  from {
+    transform: translateX(-28px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes converge-right {
+  from {
+    transform: translateX(28px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* The match. Slight overshoot is spent here and nowhere else — motion.md §4. */
+@keyframes match-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes loader-grow {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 120px;
+    opacity: 1;
+  }
+}
+
+/* Reduced motion — motion.md §6. Loaders keep spinning: reduce means
+   reduce, not remove the only sign that something is happening. */
+@media (prefers-reduced-motion: reduce) {
+  *:not([data-keep-motion]),
+  *:not([data-keep-motion])::before,
+  *:not([data-keep-motion])::after {
+    /* biome-ignore-start lint/complexity/noImportantStyles: a reduced-motion
+       reset has to beat utility classes and inline styles, or it is not a
+       reset. This is the one place !important is correct. */
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+    /* biome-ignore-end lint/complexity/noImportantStyles: end reset */
   }
 }
