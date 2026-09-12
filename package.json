@@ -16,7 +16,7 @@
     "typecheck": "tsc --noEmit",
     "test": "bun test --pass-with-no-tests",
     "audit": "bun audit --prod --audit-level=high",
-    "ci": "bun run check:ci && bun run typecheck && bun run test && bun run audit && bun run build"
+    "ci": "bun run format:check && bun run check:ci && bun run typecheck && bun run test && bun run audit && bun run build"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
