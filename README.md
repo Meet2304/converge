@@ -6,16 +6,19 @@ Practical team formation for hackathons — clearer presence and structured conn
 
 ## Current status
 
+UX is **locked through day-of**. Next phase is **execution** (implementation).
+
 | Area | Status | Doc |
 |------|--------|-----|
+| Vision / agent guide | **Locked** | [docs/vision.md](docs/vision.md) · [AGENTS.md](AGENTS.md) · [docs/INDEX.md](docs/INDEX.md) |
 | Auth & access | **Locked** | [docs/auth.md](docs/auth.md) |
 | Onboarding | **Locked** | [docs/onboarding.md](docs/onboarding.md) |
 | Client medium | **Locked** (web / Next.js) | [docs/medium.md](docs/medium.md) |
-| Pre-hackathon UX | **Draft** — open forks | [docs/pre-hackathon.md](docs/pre-hackathon.md) |
-| Day-of UX | Queued after pre-hackathon | [docs/ux-brainstorm.md](docs/ux-brainstorm.md) |
-| Implementation | Not started (docs-first) | — |
+| Pre-hackathon UX | **Locked** | [docs/pre-hackathon.md](docs/pre-hackathon.md) |
+| Day-of UX | **Locked** (map-first) | [docs/day-of.md](docs/day-of.md) |
+| Implementation | Not started | — |
 
-See [STATUS.md](STATUS.md) for the live checklist.
+See [STATUS.md](STATUS.md) for the checklist.
 
 ## Product thesis
 
@@ -27,12 +30,11 @@ Replace inefficient chat-based teammate hunting with: light join → useful prof
 
 | Host | Repo | Role |
 |------|------|------|
-| GitHub | [Meet2304/converge](https://github.com/Meet2304/converge) | Parallel agent / public twin |
+| GitHub | [Meet2304/converge](https://github.com/Meet2304/converge) | Parallel agents / public twin |
 | Origin | [`mb2304/Converge`](https://origin.cursor.com/mb2304/Converge) | Cursor Origin workspace |
 
-## Docs map
+## Agent entry
 
-- [Project context](docs/project-context.md)
-- [UX brainstorm (roadmap)](docs/ux-brainstorm.md)
-- Locked: [auth](docs/auth.md) · [onboarding](docs/onboarding.md) · [medium](docs/medium.md)
-- In progress: [pre-hackathon](docs/pre-hackathon.md)
+1. Read [AGENTS.md](AGENTS.md)
+2. Skim [docs/vision.md](docs/vision.md) + [docs/INDEX.md](docs/INDEX.md)
+3. Open only the locked SoT docs your task touches
