@@ -1,11 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createDemoEvent, createOrganization } from "@/app/actions/org";
+import { CreateDemoEventButton, CreateOrganizationForm } from "@/components/app/org-home-forms";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { requireUser } from "@/lib/auth/context";
 import { loginPath } from "@/lib/auth/paths";
 import type { SessionUser } from "@/lib/auth/types";
@@ -32,14 +29,16 @@ export default async function OrgHomePage() {
           <p className="text-sm text-muted-foreground">Organizer</p>
           <h1 className="text-3xl font-semibold tracking-tight">Your organizations</h1>
         </div>
-        <form action={createDemoEvent}>
-          <Button type="submit">Create a demo event</Button>
-        </form>
+        <CreateDemoEventButton />
       </div>
 
       <div className="grid gap-4">
         {(memberships ?? []).map((m) => {
-          const org = m.organizations as unknown as { id: string; name: string; slug: string };
+          const raw = m.organizations as unknown;
+          const org = (Array.isArray(raw) ? raw[0] : raw) as
+            | { id: string; name: string; slug: string }
+            | undefined;
+          if (!org) return null;
           return (
             <Card key={org.id} className="border-white/10">
               <CardHeader className="flex flex-row items-center justify-between gap-4">
@@ -66,21 +65,7 @@ export default async function OrgHomePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={createOrganization} className="grid gap-3">
-            <div className="grid gap-1.5">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" name="name" required />
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="description">Description</Label>
-              <Textarea id="description" name="description" rows={3} />
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="website">Website</Label>
-              <Input id="website" name="website" placeholder="https://" />
-            </div>
-            <Button type="submit">Create org</Button>
-          </form>
+          <CreateOrganizationForm />
         </CardContent>
       </Card>
     </main>

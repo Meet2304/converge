@@ -47,5 +47,5 @@ export async function clearSession() {
 }
 
 export function googleAuthEnabled() {
-  return process.env.NEXT_PUBLIC_SUPABASE_GOOGLE === "true";
+  return process.env.NEXT_PUBLIC_SUPABASE_GOOGLE !== "false";
 }

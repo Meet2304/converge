@@ -4,8 +4,9 @@ import { safeReturnTo } from "@/lib/auth/paths";
 import { getSession, googleAuthEnabled } from "@/lib/auth/session";
 
 const LOGIN_ERRORS: Record<string, string> = {
-  google: "Google sign-in is not enabled on this project yet. Create an account with email below.",
-  auth: "Sign-in was cancelled or failed. Try email instead.",
+  google:
+    "Google sign-in failed. In Supabase → Authentication → URL Configuration add this site's /auth/callback URL.",
+  auth: "Sign-in was cancelled or the email link expired. Try Google, or request a new email.",
 };
 
 export default async function LoginPage({

@@ -4,124 +4,26 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/context";
 import { makeShareCode, slugify } from "@/lib/codes";
+import { createDemoEventRecord, createOrganizationRecord } from "@/lib/org/mutations";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function createOrganization(formData: FormData) {
   const user = await requireUser();
-  const name = String(formData.get("name") || "").trim();
-  if (!name) throw new Error("Organization name required");
-
-  const db = createAdminClient();
-  let slug = slugify(name);
-  const { data: clash } = await db
-    .from("organizations")
-    .select("id")
-    .eq("slug", slug)
-    .maybeSingle();
-  if (clash) slug = `${slug}-${makeShareCode().slice(0, 3).toLowerCase()}`;
-
-  const { data: org, error } = await db
-    .from("organizations")
-    .insert({
-      name,
-      slug,
-      owner_user_id: user.id,
-      contact_email: user.email,
-      description: String(formData.get("description") || "").trim() || null,
-      website: String(formData.get("website") || "").trim() || null,
-    })
-    .select("id")
-    .single();
-  if (error || !org) throw new Error(error?.message ?? "Failed to create org");
-
-  await db.from("org_memberships").insert({
-    org_id: org.id,
-    user_id: user.id,
-    role: "owner",
+  const result = await createOrganizationRecord(user, {
+    name: String(formData.get("name") || ""),
+    description: String(formData.get("description") || ""),
+    website: String(formData.get("website") || ""),
   });
-
-  redirect(`/org/${org.id}`);
+  if ("error" in result) throw new Error(result.error);
+  redirect(`/org/${result.orgId}`);
 }
 
 export async function createDemoEvent() {
   const user = await requireUser();
-  const db = createAdminClient();
-
-  const { data: memberships } = await db
-    .from("org_memberships")
-    .select("org_id, organizations(id, name)")
-    .eq("user_id", user.id)
-    .limit(1);
-
-  let orgId = memberships?.[0]?.org_id as string | undefined;
-  if (!orgId) {
-    let slug = slugify(user.displayName ? `${user.displayName} org` : "demo-org");
-    const { data: clash } = await db
-      .from("organizations")
-      .select("id")
-      .eq("slug", slug)
-      .maybeSingle();
-    if (clash) slug = `${slug}-${makeShareCode().slice(0, 3).toLowerCase()}`;
-
-    const { data: org, error } = await db
-      .from("organizations")
-      .insert({
-        name: user.displayName ? `${user.displayName}'s org` : "Demo organization",
-        slug,
-        owner_user_id: user.id,
-        contact_email: user.email,
-        description: "Created from one-click demo setup.",
-      })
-      .select("id")
-      .single();
-    if (error || !org) throw new Error(error?.message ?? "Failed to create org");
-
-    await db.from("org_memberships").insert({
-      org_id: org.id,
-      user_id: user.id,
-      role: "owner",
-    });
-    orgId = org.id;
-  }
-
-  const starts = new Date();
-  const ends = new Date(starts.getTime() + 48 * 60 * 60 * 1000);
-  let shareCode = makeShareCode();
-  for (let i = 0; i < 5; i++) {
-    const { data: exists } = await db
-      .from("events")
-      .select("id")
-      .eq("share_code", shareCode)
-      .maybeSingle();
-    if (!exists) break;
-    shareCode = makeShareCode();
-  }
-
-  const { data: event, error } = await db
-    .from("events")
-    .insert({
-      org_id: orgId,
-      name: "Demo hackathon",
-      slug: slugify(`demo-hackathon-${shareCode}`),
-      short_description: "Looking is open. Share the code and start matching.",
-      venue_name: "Demo venue",
-      timezone: "America/New_York",
-      starts_at: starts.toISOString(),
-      ends_at: ends.toISOString(),
-      looking_opens_at: starts.toISOString(),
-      max_team_size: 4,
-      min_team_size: 1,
-      share_code: shareCode,
-      created_by: user.id,
-      map_enabled: true,
-      chat_enabled: true,
-    })
-    .select("id")
-    .single();
-  if (error || !event) throw new Error(error?.message ?? "Failed to create event");
-
-  revalidatePath(`/org/${orgId}`);
-  redirect(`/org/${orgId}/events/${event.id}`);
+  const result = await createDemoEventRecord(user);
+  if ("error" in result) throw new Error(result.error);
+  revalidatePath(`/org/${result.orgId}`);
+  redirect(`/org/${result.orgId}/events/${result.eventId}`);
 }
 
 export async function createEvent(formData: FormData) {
