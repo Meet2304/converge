@@ -45,7 +45,8 @@ Product direction is locked (auth → join → pre-event → day-of). **The app 
 
 - [Product vision](docs/vision.md)  
 - [Concept index](docs/INDEX.md)  
-- [Pre-event experience](docs/pre-hackathon.md) · [Day-of map](docs/day-of.md)
+- [Pre-event experience](docs/pre-hackathon.md) · [Day-of map](docs/day-of.md)  
+- [Design system](docs/design/README.md) — the look above, and how it's built
 
 ---
 

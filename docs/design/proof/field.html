@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Converge — field proof</title>
+<style>
+  /* Probe only — the app self-hosts a latin subset via next/font/local. */
+  @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@200;400&display=swap');
+
+  :root {
+    --void: #000; --surface: #101010; --raised: #1a1a1a;
+    --text-1: #f2f2f2; --text-2: #a8a8a8; --text-3: #787878;
+    --line: rgba(255,255,255,.14); --line-quiet: rgba(255,255,255,.07);
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--void); color: var(--text-1);
+    font: 12px/1.5 var(--mono); overflow: hidden;
+  }
+
+  #stage { position: fixed; inset: 0; display: grid; place-items: center; background: var(--void); }
+  #frame { position: relative; width: 100%; height: 100%; }
+  #frame.locked {
+    width: min(100vw, calc(100vh * 2.3337));
+    height: min(100vh, calc(100vw / 2.3337));
+  }
+  canvas { display: block; width: 100%; height: 100%; }
+  #ref {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: fill; pointer-events: none; opacity: 0;
+    mix-blend-mode: difference;
+  }
+  #ref.plain { mix-blend-mode: normal; }
+
+  #wordmark {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    pointer-events: none; opacity: 0; transition: opacity .2s;
+    font-family: Kanit, system-ui, sans-serif; font-weight: 200;
+    font-size: clamp(44px, 9vw, 96px); letter-spacing: -.035em; color: #f2f2f2;
+  }
+  #wordmark.on { opacity: 1; }
+
+  #panel {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 308px;
+    background: rgba(8,8,8,.92); backdrop-filter: blur(12px);
+    border-left: 1px solid var(--line);
+    overflow-y: auto; overscroll-behavior: contain;
+    padding: 14px 14px 40px;
+    transition: transform .2s cubic-bezier(.16,1,.3,1);
+  }
+  #panel.hidden { transform: translateX(100%); }
+
+  h1 { font-size: 12px; font-weight: 400; margin: 0 0 2px; letter-spacing: .02em; }
+  .sub { color: var(--text-3); margin: 0 0 14px; font-size: 11px; }
+  h2 {
+    font-size: 10px; font-weight: 400; color: var(--text-3);
+    margin: 18px 0 8px; padding-bottom: 5px;
+    border-bottom: 1px solid var(--line-quiet); letter-spacing: .06em;
+  }
+
+  .row { display: grid; grid-template-columns: 1fr 58px; gap: 8px; align-items: center; margin-bottom: 7px; }
+  .row label { color: var(--text-2); font-size: 11px; }
+  .row output { color: var(--text-1); text-align: right; font-variant-numeric: tabular-nums; }
+  input[type=range] { grid-column: 1 / -1; width: 100%; height: 16px; margin: 0; -webkit-appearance: none; background: none; }
+  input[type=range]::-webkit-slider-runnable-track { height: 1px; background: var(--line); }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 11px; height: 11px; margin-top: -5px;
+    background: var(--text-1); border-radius: 50%; cursor: pointer;
+  }
+  input[type=range]::-moz-range-track { height: 1px; background: var(--line); }
+  input[type=range]::-moz-range-thumb { width: 11px; height: 11px; background: var(--text-1); border: 0; border-radius: 50%; cursor: pointer; }
+
+  .btns { display: flex; flex-wrap: wrap; gap: 5px; }
+  button {
+    font: inherit; color: var(--text-1); background: transparent;
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 6px 9px; cursor: pointer;
+    transition: background .12s cubic-bezier(.16,1,.3,1), border-color .12s cubic-bezier(.16,1,.3,1);
+  }
+  button:hover { background: var(--raised); border-color: rgba(255,255,255,.28); }
+  button.on { background: var(--text-1); color: var(--void); border-color: var(--text-1); }
+  button:focus-visible { outline: 2px solid var(--text-1); outline-offset: 2px; }
+
+  .note { color: var(--text-3); font-size: 10px; line-height: 1.45; margin: 8px 0 0; }
+  #json {
+    width: 100%; height: 150px; margin-top: 8px; resize: vertical;
+    background: var(--surface); color: var(--text-2);
+    border: 1px solid var(--line); border-radius: 6px;
+    font: 10px/1.45 var(--mono); padding: 8px;
+  }
+  #hud { position: fixed; left: 12px; bottom: 12px; color: var(--text-3); font-size: 10px; pointer-events: none; letter-spacing: .03em; }
+  #show { position: fixed; top: 12px; right: 12px; display: none; background: rgba(8,8,8,.92); z-index: 5; }
+  #panel.hidden ~ #show { display: block; }
+  #err { position: fixed; inset: 0; display: none; place-items: center; padding: 24px; text-align: center; color: var(--text-2); background: var(--void); }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="frame" class="locked">
+    <canvas id="gl"></canvas>
+    <img id="ref" class="plain" src="../../assets/converge-header.png" alt="">
+    <div id="wordmark">Converge</div>
+  </div>
+</div>
+
+<div id="hud"></div>
+<div id="err"><div>This page needs WebGL2.<br>Try a current Chrome, Edge, Firefox or Safari.</div></div>
+
+<aside id="panel">
+  <h1>Field proof</h1>
+  <p class="sub">Tuning harness for ../field.md — <kbd>H</kbd> hides this panel</p>
+
+  <h2>reference</h2>
+  <div class="btns">
+    <button id="bMatch">match the reference</button>
+    <button id="bFit">auto-fit</button>
+    <button id="bLock" class="on">lock aspect</button>
+    <button id="bDiff">difference</button>
+  </div>
+  <div class="row"><label>mean error</label><output id="oScore">—</output></div>
+  <div class="row"><label for="sRef">overlay</label><output id="oRef">0.00</output>
+    <input type="range" id="sRef" min="0" max="1" step="0.01" value="0"></div>
+  <p class="note">Difference mode is the diagnostic, not the resting state: the closer the match, the blacker the screen. Plain overlay at 50% compares them as images.</p>
+
+  <h2>state</h2>
+  <div class="btns" id="presets"></div>
+  <div class="row"><label for="sConv">convergence</label><output id="oConv">0.00</output>
+    <input type="range" id="sConv" min="0" max="1" step="0.01" value="0.5"></div>
+  <p class="note">Presets animate convergence through the damping in §3.1 — watch the transition, not the endpoint.</p>
+
+  <h2>team formed</h2>
+  <div class="btns"><button id="bBloom">replay</button></div>
+  <div id="response"></div>
+  <p class="note">The beams close slowly, the field gathers inward and darkens, then releases out to the edges before settling into a slow breathe. Judge it running — the peak lasts a fraction of a second, so a still always overstates it.</p>
+
+  <h2>beam</h2>
+  <div id="beam"></div>
+
+  <h2>dither</h2>
+  <div class="btns" id="noise"></div>
+  <div id="dither"></div>
+
+  <h2>pointer</h2>
+  <div id="pointer"></div>
+
+  <h2>damping — tau (s)</h2>
+  <div id="taus"></div>
+
+  <h2>probes</h2>
+  <div class="btns">
+    <button id="bWord">wordmark</button>
+    <button id="bShim">shimmer</button>
+    <button id="bFreeze">freeze</button>
+  </div>
+  <p class="note">Freeze emulates prefers-reduced-motion.</p>
+
+  <h2>output</h2>
+  <div class="btns">
+    <button id="bCopy">copy json</button>
+    <button id="bReset">reset</button>
+  </div>
+  <textarea id="json" readonly spellcheck="false"></textarea>
+</aside>
+<button id="show">controls</button>
+
+<script type="module">
+import {
+  createField, FIELD_DEFAULTS, NOISE_MODES, TAU, BLOOM, BREATHE,
+  WAIST_OPEN, WAIST_CLOSED, DPR_CAP
+} from './field-renderer.js';
+
+const canvas = document.getElementById('gl');
+const frame  = document.getElementById('frame');
+const refImg = document.getElementById('ref');
+const panel  = document.getElementById('panel');
+const hud    = document.getElementById('hud');
+const wordmark = document.getElementById('wordmark');
+
+const field = createField(canvas, { pointerTarget: frame, observe: false });
+if (!field) { document.getElementById('err').style.display = 'grid'; throw new Error('no webgl2'); }
+
+const P = field.params, T = field.tau, B = field.bloom;
+let influence = 1;
+
+/* ---------------------------------------------------------------- controls */
+
+// [key, label, min, max, step, target]
+const SLIDERS = {
+  beam: [
+    ['waist',    'waist',      0.05, 1.40, 0.005, P],
+    ['flare',    'flare',     -3.00, 3.00, 0.01,  P],
+    ['sigma',    'sigma',      0.02, 0.60, 0.005, P],
+    ['freq',     'freq',       0.00, 40.0, 0.1,   P],
+    ['gain',     'gain',       0.05, 3.00, 0.01,  P],
+    ['gamma',    'gamma',      0.30, 6.00, 0.01,  P],
+    ['halo',     'halo',       0.00, 1.00, 0.005, P],
+    ['haloSigma','halo width', 0.10, 2.50, 0.01,  P],
+    ['ring',     'ring',       0.00, 0.50, 0.005, P],
+    ['vigInner', 'vig inner',  0.00, 4.00, 0.05,  P],
+    ['vigOuter', 'vig outer',  0.00, 4.00, 0.05,  P]
+  ],
+  dither: [
+    ['levels', 'levels', 3, 32,  1,    P],
+    ['grain',  'grain',  0, 3.0, 0.01, P]
+  ],
+  response: [
+    ['amount', 'amount', 0,    2.5, 0.01, B],
+    ['delay',  'delay',  0,    2.0, 0.01, B],
+    ['gather', 'gather', 0,    1.0, 0.01, B],
+    ['attack', 'attack', 0.04, 1.2, 0.01, B],
+    ['decay',  'decay',  0.2,  6.0, 0.05, B]
+  ],
+  taus: [
+    ['origin', 'origin', 0.02, 2, 0.01, T],
+    ['gain',   'gain',   0.02, 2, 0.01, T],
+    ['flare',  'flare',  0.02, 2, 0.01, T],
+    ['waist',  'waist',  0.02, 2, 0.01, T]
+  ]
+};
+
+const outs = [];
+
+function slider(host, key, label, min, max, step, obj, onInput) {
+  const row = document.createElement('div'); row.className = 'row';
+  const l = document.createElement('label'); l.textContent = label;
+  const o = document.createElement('output');
+  const i = document.createElement('input');
+  i.type = 'range'; i.min = min; i.max = max; i.step = step;
+  l.htmlFor = i.id = `s_${host.id}_${key}`;
+  const dp = step >= 1 ? 0 : String(step).split('.')[1].length;
+  const fmt = v => v.toFixed(dp);
+  const sync = () => { i.value = obj[key]; o.textContent = fmt(obj[key]); };
+  i.addEventListener('input', () => {
+    obj[key] = parseFloat(i.value);
+    o.textContent = fmt(obj[key]);
+    onInput && onInput();
+    writeJSON();
+  });
+  sync();
+  row.append(l, o, i); host.append(row);
+  outs.push(sync);
+}
+
+for (const [group, defs] of Object.entries(SLIDERS)) {
+  const host = document.getElementById(group);
+  for (const [key, label, min, max, step, obj] of defs) {
+    slider(host, key, label, min, max, step, obj,
+      key === 'waist' && obj === P ? () => { convergence = null; syncConv(); } : null);
+  }
+}
+
+// Pointer influence lives on the field, not in a params object.
+{
+  const host = document.getElementById('pointer');
+  const proxy = { get influence() { return influence; }, set influence(v) { influence = v; field.setInfluence(v); } };
+  slider(host, 'influence', 'influence', 0, 1, 0.01, proxy);
+}
+
+/* ------------------------------------------------------------------- noise */
+
+const noiseHost = document.getElementById('noise');
+NOISE_MODES.forEach((name, i) => {
+  const b = document.createElement('button');
+  b.textContent = name; b.dataset.mode = i;
+  b.addEventListener('click', () => { P.noise = i; syncNoise(); writeJSON(); });
+  noiseHost.append(b);
+});
+const syncNoise = () => noiseHost.querySelectorAll('button')
+  .forEach(b => b.classList.toggle('on', +b.dataset.mode === P.noise));
+
+/* ------------------------------------------------------------------ state */
+
+const PRESETS = {
+  'alone': 0, 'looking': 0.35, 'like sent': 0.55, 'match': 0.95,
+  'team formed': 1, 'finder · far': 0.10, 'finder · near': 0.88
+};
+
+let convergence = null;
+const sConv = document.getElementById('sConv'), oConv = document.getElementById('oConv');
+
+function syncConv() {
+  if (convergence === null) {
+    const c = Math.max(0, Math.min(1, (WAIST_OPEN - P.waist) / (WAIST_OPEN - WAIST_CLOSED)));
+    oConv.textContent = c.toFixed(2); sConv.value = c;
+    field.state.convergence = null;
+  } else {
+    oConv.textContent = convergence.toFixed(2); sConv.value = convergence;
+  }
+}
+
+function setConvergence(v, withBloom) {
+  convergence = v;
+  field.setConvergence(v, { bloom: !!withBloom });
+  syncConv(); refreshSliders(); writeJSON();
+}
+
+const presetHost = document.getElementById('presets');
+for (const [name, value] of Object.entries(PRESETS)) {
+  const b = document.createElement('button');
+  b.textContent = name;
+  b.addEventListener('click', () => setConvergence(value, value >= 0.98));
+  presetHost.append(b);
+}
+sConv.addEventListener('input', () => setConvergence(parseFloat(sConv.value), false));
+document.getElementById('bBloom').addEventListener('click', () => setConvergence(1, true));
+
+/* --------------------------------------------------------------- overlay */
+
+const sRef = document.getElementById('sRef'), oRef = document.getElementById('oRef');
+const setOverlay = v => { sRef.value = v; refImg.style.opacity = v; oRef.textContent = (+v).toFixed(2); };
+sRef.addEventListener('input', () => setOverlay(sRef.value));
+
+document.getElementById('bLock').addEventListener('click', e => {
+  frame.classList.toggle('locked');
+  e.currentTarget.classList.toggle('on', frame.classList.contains('locked'));
+  field.resize();
+});
+document.getElementById('bDiff').addEventListener('click', e => {
+  refImg.classList.toggle('plain');
+  e.currentTarget.classList.toggle('on', !refImg.classList.contains('plain'));
+});
+document.getElementById('bMatch').addEventListener('click', () => {
+  Object.assign(P, FIELD_DEFAULTS);
+  convergence = null; field.state.convergence = null;
+  influence = 0; field.setInfluence(0);
+  frame.classList.add('locked'); document.getElementById('bLock').classList.add('on');
+  // Leave the blend mode alone: a plain overlay at full opacity would just
+  // hide the field, so it comes in at 50% there and 100% in difference mode.
+  setOverlay(refImg.classList.contains('plain') ? 0.5 : 1);
+  refreshSliders(); field.resize();
+});
+
+/* -------------------------------------------------------------- auto-fit */
+
+// Fits the smooth light field to the reference by coordinate descent.
+// Scoring runs with dithering OFF against a downsampled reference, so the
+// fit targets the underlying light — grain and levels stay judgement calls.
+// Needs same-origin pixels: serve the folder over http.
+
+const FIT_W = 240, FIT_H = 103, STRUCTURE_WEIGHT = 3.0;
+const FIT_KEYS = [
+  ['waist',    0.05, 1.40, 0.10],
+  ['flare',   -3.00, 3.00, 0.35],
+  ['sigma',    0.02, 0.60, 0.06],
+  ['freq',     0.00, 40.0, 4.00],
+  ['gain',     0.05, 3.00, 0.20],
+  ['gamma',    0.30, 6.00, 0.40],
+  ['halo',     0.00, 1.00, 0.12],
+  ['haloSigma',0.10, 2.50, 0.30],
+  // Capped at 0.22: above that the satellite bands read as overlapping
+  // waves. Taste bounds the fit here, not the other way round.
+  ['ring',     0.00, 0.22, 0.05],
+  ['vigInner', 0.00, 4.00, 0.40],
+  ['vigOuter', 0.00, 4.00, 0.40]
+];
+
+const gl = field.gl;
+let fitTarget = null, fitTargetGrad = null, fbo = null, readBuf = null, ours = null;
+
+function gradient(src) {
+  const g = new Float32Array(FIT_W * FIT_H);
+  for (let y = 0; y < FIT_H; y++) for (let x = 0; x < FIT_W; x++) {
+    const i = y * FIT_W + x;
+    g[i] = Math.abs(src[y * FIT_W + Math.min(FIT_W - 1, x + 1)] - src[i])
+         + Math.abs(src[Math.min(FIT_H - 1, y + 1) * FIT_W + x] - src[i]);
+  }
+  return g;
+}
+
+function initFit() {
+  if (fbo) return true;
+  const c = document.createElement('canvas');
+  c.width = FIT_W; c.height = FIT_H;
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(refImg, 0, 0, FIT_W, FIT_H);
+  let px;
+  try { px = ctx.getImageData(0, 0, FIT_W, FIT_H).data; }
+  catch { return false; }                          // canvas tainted by file://
+
+  fitTarget = new Float32Array(FIT_W * FIT_H);     // readPixels is bottom-up
+  for (let y = 0; y < FIT_H; y++) for (let x = 0; x < FIT_W; x++) {
+    const s = ((FIT_H - 1 - y) * FIT_W + x) * 4;
+    fitTarget[y * FIT_W + x] = (0.2126 * px[s] + 0.7152 * px[s + 1] + 0.0722 * px[s + 2]) / 255;
+  }
+  fitTargetGrad = gradient(fitTarget);
+
+  const tex = gl.createTexture();
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, FIT_W, FIT_H, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  fbo = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.activeTexture(gl.TEXTURE0);
+  readBuf = new Uint8Array(FIT_W * FIT_H * 4);
+  ours = new Float32Array(FIT_W * FIT_H);
+  return true;
+}
+
+function score(p) {
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  gl.viewport(0, 0, FIT_W, FIT_H);
+  gl.uniform2f(field.uniforms.uResolution, FIT_W, FIT_H);
+  field.applyUniforms({ ...P, ...p }, { levels: 255, grain: 0, bloom: 0 });
+  field.draw();
+  gl.readPixels(0, 0, FIT_W, FIT_H, gl.RGBA, gl.UNSIGNED_BYTE, readBuf);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.viewport(0, 0, field.width, field.height);
+
+  const n = FIT_W * FIT_H;
+  for (let i = 0; i < n; i++) ours[i] = readBuf[i * 4] / 255;
+  const og = gradient(ours);
+
+  // Level error alone rewards a flat grey wash that matches the mean and has
+  // no ridges in it. The gradient term is what makes local contrast count.
+  let level = 0, structure = 0;
+  for (let i = 0; i < n; i++) {
+    level     += Math.abs(ours[i] - fitTarget[i]);
+    structure += Math.abs(og[i] - fitTargetGrad[i]);
+  }
+  return (level + STRUCTURE_WEIGHT * structure) / n;
+}
+
+function descend(start, rounds) {
+  const p = { ...start }, step = {};
+  for (const [k, , , d] of FIT_KEYS) step[k] = d;
+  let best = score(p);
+  for (let r = 0; r < rounds; r++) {
+    for (const [k, lo, hi] of FIT_KEYS) {
+      for (const dir of [1, -1]) {
+        const was = p[k];
+        p[k] = Math.max(lo, Math.min(hi, was + dir * step[k]));
+        if (p[k] === was) continue;
+        const s = score(p);
+        if (s < best) best = s; else p[k] = was;
+      }
+      step[k] *= 0.62;
+    }
+  }
+  return { score: best, params: p };
+}
+
+// Coordinate descent finds a local minimum, so start it from many places.
+function autoFit(starts = 24, rounds = 9) {
+  if (!initFit()) return null;
+  const here = {}; for (const [k] of FIT_KEYS) here[k] = P[k];
+  let best = descend(here, rounds);
+  for (let i = 1; i < starts; i++) {
+    const s = {};
+    for (const [k, lo, hi] of FIT_KEYS) s[k] = lo + Math.random() * (hi - lo);
+    const r = descend(s, rounds);
+    if (r.score < best.score) best = r;
+  }
+  const fine = descend(best.params, 6);
+  if (fine.score < best.score) best = fine;
+
+  Object.assign(P, best.params);
+  document.getElementById('oScore').textContent = best.score.toFixed(4);
+  refreshSliders(); writeJSON();
+  return best;
+}
+
+document.getElementById('bFit').addEventListener('click', e => {
+  const label = e.currentTarget;
+  label.textContent = 'fitting…';
+  setTimeout(() => {
+    const r = autoFit();
+    label.textContent = r ? 'auto-fit' : 'blocked — serve over http';
+    if (!r) setTimeout(() => { label.textContent = 'auto-fit'; }, 2600);
+  }, 20);
+});
+
+/* --------------------------------------------------------------- probes */
+
+document.getElementById('bWord').addEventListener('click', e => {
+  wordmark.classList.toggle('on');
+  e.currentTarget.classList.toggle('on', wordmark.classList.contains('on'));
+});
+document.getElementById('bShim').addEventListener('click', e => {
+  const on = !e.currentTarget.classList.contains('on');
+  field.setShimmer(on); e.currentTarget.classList.toggle('on', on);
+});
+const bFreeze = document.getElementById('bFreeze');
+bFreeze.classList.toggle('on', field.state.frozen);
+bFreeze.addEventListener('click', e => {
+  const on = !e.currentTarget.classList.contains('on');
+  field.setFrozen(on); e.currentTarget.classList.toggle('on', on);
+});
+
+document.getElementById('bReset').addEventListener('click', () => {
+  Object.assign(P, FIELD_DEFAULTS);
+  Object.assign(T, TAU);
+  Object.assign(B, BLOOM);
+  convergence = null; field.state.convergence = null;
+  influence = 1; field.setInfluence(1);
+  refreshSliders();
+});
+document.getElementById('bCopy').addEventListener('click', async e => {
+  try { await navigator.clipboard.writeText(document.getElementById('json').value); e.currentTarget.textContent = 'copied'; }
+  catch { e.currentTarget.textContent = 'select + copy'; }
+  setTimeout(() => { e.currentTarget.textContent = 'copy json'; }, 1400);
+});
+document.getElementById('show').addEventListener('click', () => panel.classList.remove('hidden'));
+addEventListener('keydown', e => {
+  if ((e.key === 'h' || e.key === 'H') && e.target.tagName !== 'TEXTAREA') panel.classList.toggle('hidden');
+});
+
+/* ----------------------------------------------------------------- output */
+
+function refreshSliders() { for (const s of outs) s(); syncNoise(); syncConv(); writeJSON(); }
+
+function writeJSON() {
+  document.getElementById('json').value = JSON.stringify({
+    field: {
+      waist: +P.waist.toFixed(3), flare: +P.flare.toFixed(3), sigma: +P.sigma.toFixed(3),
+      freq: +P.freq.toFixed(2), gain: +P.gain.toFixed(3), gamma: +P.gamma.toFixed(3),
+      halo: +P.halo.toFixed(3), haloSigma: +P.haloSigma.toFixed(3), ring: +P.ring.toFixed(3),
+      vigInner: +P.vigInner.toFixed(2), vigOuter: +P.vigOuter.toFixed(2),
+      levels: P.levels | 0, grain: +P.grain.toFixed(2), noise: NOISE_MODES[P.noise]
+    },
+    tau: { origin: +T.origin.toFixed(2), gain: +T.gain.toFixed(2), flare: +T.flare.toFixed(2), waist: +T.waist.toFixed(2) },
+    teamFormed: {
+      amount: +B.amount.toFixed(2), delay: +B.delay.toFixed(2), gather: +B.gather.toFixed(2),
+      attack: +B.attack.toFixed(2), decay: +B.decay.toFixed(2),
+      breatheAmp: BREATHE.amp, breathePeriod: BREATHE.period
+    },
+    pointer: { influence: +influence.toFixed(2) },
+    convergence: convergence === null ? null : +convergence.toFixed(2)
+  }, null, 2);
+}
+
+/* ---------------------------------------------------------- url overrides */
+
+const qs = new URLSearchParams(location.search);
+for (const k of Object.keys(P)) if (qs.has(k)) P[k] = parseFloat(qs.get(k));
+if (qs.get('noise')) P.noise = Math.max(0, NOISE_MODES.indexOf(qs.get('noise')));
+if (qs.has('influence')) { influence = parseFloat(qs.get('influence')); field.setInfluence(influence); }
+if (qs.get('panel') === '0') panel.classList.add('hidden');
+if (qs.get('bare') === '1') {
+  panel.classList.add('hidden');
+  document.getElementById('show').style.display = 'none';
+  hud.style.display = 'none';
+}
+if (qs.has('ref')) setOverlay(parseFloat(qs.get('ref')));
+if (qs.get('diff') === '1') { refImg.classList.remove('plain'); document.getElementById('bDiff').classList.add('on'); }
+if (qs.get('word') === '1') wordmark.classList.add('on');
+if (qs.has('convergence')) setConvergence(parseFloat(qs.get('convergence')), false);
+if (qs.get('freeze') === '1') { field.setFrozen(true); bFreeze.classList.add('on'); }
+// Pin the bloom envelope at a phase so it can be inspected as a still.
+if (qs.has('bloomhold')) field.holdBloom(parseFloat(qs.get('bloomhold')));
+
+// Headless driving: publishes the fit result in document.title for --dump-dom.
+if (qs.get('fit') === '1') {
+  const run = () => {
+    const r = autoFit(+(qs.get('starts') || 24), 9);
+    document.title = r ? 'FIT ' + JSON.stringify(r) : 'FIT blocked';
+  };
+  if (refImg.complete) setTimeout(run, 60);
+  else refImg.addEventListener('load', () => setTimeout(run, 60));
+}
+
+refreshSliders();
+
+/* -------------------------------------------------------------------- hud */
+
+let fps = 60, last = performance.now(), n = 0;
+(function tick(now) {
+  const dt = (now - last) / 1000; last = now;
+  fps += (1 / Math.max(dt, 1e-4) - fps) * 0.05;
+  if ((n++ & 15) === 0) {
+    hud.textContent = `${field.width}×${field.height} · dpr ${Math.min(devicePixelRatio || 1, DPR_CAP)}`
+      + ` · ${fps.toFixed(0)} fps · waist ${field.cur.waist.toFixed(3)}`
+      + (field.state.frozen ? ' · frozen' : '');
+  }
+  requestAnimationFrame(tick);
+})(performance.now());
+</script>
+</body>
+</html>
