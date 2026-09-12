@@ -34,12 +34,15 @@ The `Verify` job uses a frozen lockfile and executes every quality gate. Pull re
 GitHub's dependency review and fail when a changed dependency introduces a high or critical
 advisory.
 
-In GitHub repository settings, protect `main` and require these checks before merge:
+The GitHub repository protects `main` and requires these checks before merge:
 
 - `CI / Verify`
 - `CI / Dependency review`
+- `Vercel`
 
-Also disable direct pushes to `main` so a pull request cannot bypass the checks.
+The rule uses strict status checks and applies to administrators, so direct pushes cannot bypass the
+pipeline. If a check name changes in this workflow, update the branch protection rule at the same
+time.
 
 ## Vercel delivery
 
