@@ -24,7 +24,7 @@ Snapshot for agents working from this repo. Product detail lives under `docs/` a
 
 ## Next
 
-- [ ] **Next.js skeleton** — App Router + Tailwind + shadcn on Vercel ([docs/build-order.md](docs/build-order.md) Phase 1)
+- [x] **Next.js skeleton** — App Router + Tailwind + shadcn (bun) — Phase 1.1
 - [ ] **Auth0 wiring** — Google login + stable anon session merge
 - [ ] Wire Grok APIs when credentials arrive (nickname + Imagine avatar)
 
