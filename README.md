@@ -43,8 +43,11 @@ Product definition through day-of is locked. **Next.js + Tailwind + shadcn skele
 
 ```bash
 bun install
-bun dev
+bun dev      # Next runs on Node via package scripts
+bun run build
 ```
+
+Vercel: install with bun `1.4.2` (see `vercel.json`); `build` is `next build` on Node (not `bun --bun`).
 
 
 ## Learn more
