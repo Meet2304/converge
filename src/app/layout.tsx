@@ -1,5 +1,8 @@
 import type { Metadata } from "next"
 import { Geist_Mono, Kanit } from "next/font/google"
+import { Suspense } from "react"
+import { SiteHeader } from "@/components/app/site-header"
+import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
 const kanit = Kanit({
@@ -18,18 +21,15 @@ export const metadata: Metadata = {
   description: "Hackathon team formation — find your people before and during the event.",
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${kanit.variable} ${geistMono.variable} dark h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
-        {children}
+    <html lang="en" className={`${kanit.variable} ${geistMono.variable} dark h-full antialiased`}>
+      <body className="flex min-h-full flex-col bg-background text-foreground">
+        <Suspense fallback={null}>
+          <SiteHeader />
+        </Suspense>
+        <div className="flex flex-1 flex-col">{children}</div>
+        <Toaster />
       </body>
     </html>
   )
