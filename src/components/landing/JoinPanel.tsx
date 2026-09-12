@@ -1,7 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type FormEvent, useId, useState } from "react";
+import { type FormEvent, useEffect, useId, useState } from "react";
+import { useField } from "@/components/field/FieldProvider";
+
+const CODE_LENGTH = 8;
 
 /**
  * Pulls a code out of whatever someone pasted.
@@ -22,12 +25,23 @@ export function normalizeCode(raw: string): string {
   return value.replace(/[\s-]/g, "").toUpperCase();
 }
 
-export function JoinPanel() {
+export function JoinPanel({
+  onConvergence,
+}: {
+  /** Hero convergence as the code fills in — the beams close as you type. */
+  onConvergence?: (v: number) => void;
+}) {
   const router = useRouter();
   const inputId = useId();
   const errorId = useId();
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const { field } = useField();
+
+  useEffect(() => {
+    const filled = Math.min(1, normalizeCode(value).length / CODE_LENGTH);
+    onConvergence?.(0.22 + filled * 0.6);
+  }, [value, onConvergence]);
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -39,17 +53,18 @@ export function JoinPanel() {
     }
 
     setError(null);
+    // The beams close on the way out — you converged on an event.
+    field()?.setConvergence(1, { bloom: true });
     // Lookup lands with Supabase; until then the event route resolves the
-    // code and owns the "no event with that code" state. Inventing a
-    // client-side miss here would be a lie about data we do not have.
-    router.push(`/event/${encodeURIComponent(code.toLowerCase())}`);
+    // code and owns the "no event with that code" state.
+    setTimeout(() => router.push(`/event/${encodeURIComponent(code.toLowerCase())}`), 650);
   }
 
   return (
     <form
       onSubmit={onSubmit}
       noValidate
-      className="border-line bg-surface/70 w-full max-w-[380px] rounded-[24px] border p-5 backdrop-blur-xl"
+      className="border-line bg-void/60 w-full max-w-[380px] rounded-[24px] border p-5 backdrop-blur-xl"
     >
       <label htmlFor={inputId} className="label text-ink-2 block">
         Event code

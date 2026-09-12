@@ -259,6 +259,26 @@
   .measure {
     max-width: 62ch;
   }
+
+  /* Field.md §7: luminance under body text never exceeds 0.35. The field is
+     a background and has to lose to text every time. This is the scrim the
+     spec prefers over relying on placement alone. */
+  .text-scrim {
+    position: relative;
+  }
+  .text-scrim::before {
+    content: "";
+    position: absolute;
+    inset: -10% -14%;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse at 40% 50%,
+      rgb(0 0 0 / 0.82),
+      rgb(0 0 0 / 0.55) 45%,
+      transparent 75%
+    );
+  }
 }
 
 @layer base {
@@ -274,6 +294,68 @@
   :focus-visible {
     outline: 2px solid var(--ink-1);
     outline-offset: 2px;
+  }
+}
+
+/* A person on the venue map. Slow and shallow — presence, not a beacon. */
+@keyframes pulse-point {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+}
+
+/* A new joiner arriving at the top of the Looking list. */
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    background-color: rgb(255 255 255 / 0.06);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    background-color: transparent;
+  }
+}
+
+/* The two of you closing on each other. The brand metaphor, executed at
+   component scale so the page behind it stays readable. */
+@keyframes converge-left {
+  from {
+    transform: translateX(-28px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes converge-right {
+  from {
+    transform: translateX(28px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* The match. Slight overshoot is spent here and nowhere else — motion.md §4. */
+@keyframes match-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 

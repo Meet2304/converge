@@ -347,6 +347,10 @@ export function createField(canvas, opts = {}) {
     // available at any convergence, so a hero can stay alive without
     // pretending a team just formed.
     ambient: opts.ambient ?? false,
+    // Per-surface offsets a page can lean on: where the waist sits and how
+    // bright the field is. Damped like everything else, so a section change
+    // reads as the light moving rather than a cut.
+    section: { ox: 0, oy: 0, gain: 1 },
   };
 
   const cur = {
@@ -439,15 +443,20 @@ export function createField(canvas, opts = {}) {
     } else {
       cur.aperture = damp(cur.aperture, apertureT, tau.gain, dt);
       cur.flareBoost = damp(cur.flareBoost, flareT, tau.flare, dt);
-      cur.ox = damp(cur.ox, px * 0.35 * inf, tau.origin, dt);
-      cur.oy = damp(cur.oy, py * 0.35 * inf, tau.origin, dt);
+      cur.ox = damp(cur.ox, px * 0.35 * inf + state.section.ox, tau.origin * 3, dt);
+      cur.oy = damp(cur.oy, py * 0.35 * inf + state.section.oy, tau.origin * 3, dt);
       // The close is ceremonial while the team-formed sequence runs.
       const tauW =
         seq >= 0 && seq < bloomCfg.delay + bloomCfg.decay * 3
           ? tau.waist * bloomCfg.slowdown
           : tau.waist;
       cur.waist = damp(cur.waist, params.waist * (1 - 0.35 * cur.aperture), tauW, dt);
-      cur.gain = damp(cur.gain, params.gain * (1 + 0.25 * cur.aperture), tau.gain, dt);
+      cur.gain = damp(
+        cur.gain,
+        params.gain * (1 + 0.25 * cur.aperture) * state.section.gain,
+        tau.gain * 2,
+        dt,
+      );
       cur.flare = damp(cur.flare, params.flare * (1 + 0.6 * cur.flareBoost), tau.flare, dt);
     }
 
@@ -569,6 +578,10 @@ export function createField(canvas, opts = {}) {
       params.waist = waistFor(v);
     },
 
+    /** Lean the field for a surface: waist offset in field units, gain multiplier. */
+    setSection({ ox = 0, oy = 0, gain = 1 } = {}) {
+      state.section = { ox, oy, gain };
+    },
     setAmbient(v) {
       state.ambient = v;
     },
