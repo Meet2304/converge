@@ -1,6 +1,32 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { SessionUser } from "./types";
 
+function toSessionUser(user: {
+  id: string;
+  auth0_sub: string;
+  email: string | null;
+  display_name: string | null;
+  moderation_status: SessionUser["moderationStatus"];
+}): SessionUser {
+  return {
+    id: user.id,
+    auth0Sub: user.auth0_sub,
+    email: user.email,
+    displayName: user.display_name,
+    moderationStatus: user.moderation_status,
+  };
+}
+
+export async function getAppUserByAuthSub(authSub: string): Promise<SessionUser | null> {
+  const db = createAdminClient();
+  const { data: user } = await db
+    .from("users")
+    .select("id, auth0_sub, email, display_name, moderation_status")
+    .eq("auth0_sub", authSub)
+    .maybeSingle();
+  return user ? toSessionUser(user) : null;
+}
+
 export async function upsertUserAndMergeAnon(opts: {
   auth0Sub: string;
   email?: string | null;
@@ -29,13 +55,7 @@ export async function upsertUserAndMergeAnon(opts: {
     await mergeAnonIntoUser(user.id, opts.anonSessionId);
   }
 
-  return {
-    id: user.id,
-    auth0Sub: user.auth0_sub,
-    email: user.email,
-    displayName: user.display_name,
-    moderationStatus: user.moderation_status,
-  };
+  return toSessionUser(user);
 }
 
 export async function mergeAnonIntoUser(userId: string, anonSessionId: string) {

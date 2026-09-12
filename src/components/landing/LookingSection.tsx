@@ -299,7 +299,7 @@ function MatchOverlay({ person, onDismiss }: { person: Candidate; onDismiss: () 
         <p className="body text-ink-2 mt-2">You and {person.name} liked each other.</p>
 
         <div className="mt-7 flex flex-col items-center gap-3">
-          {/* Chat needs Auth0 — auth.md §3.3. The button says the real gate. */}
+          {/* Chat needs a signed-in account — auth.md §3.3. */}
           <button
             type="button"
             className="bg-ink text-void h-11 rounded-[10px] px-5 font-[family-name:var(--font-display)] text-[16px] font-semibold"

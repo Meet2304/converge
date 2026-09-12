@@ -1,12 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { clearSessionCookie } from "@/lib/auth/session";
+import { clearSession } from "@/lib/auth/session";
+import { requestOrigin } from "@/lib/http/request-origin";
 
 export async function POST() {
-  await clearSessionCookie();
+  await clearSession();
   return NextResponse.json({ ok: true });
 }
 
 export async function GET(req: NextRequest) {
-  await clearSessionCookie();
-  return NextResponse.redirect(new URL("/", req.url));
+  await clearSession();
+  return NextResponse.redirect(new URL("/", requestOrigin(req)));
 }

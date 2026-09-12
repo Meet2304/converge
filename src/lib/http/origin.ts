@@ -10,7 +10,7 @@ export async function getAppOrigin(): Promise<string> {
     return `${proto}://${host}`;
   }
 
-  const configured = process.env.NEXT_PUBLIC_APP_URL || process.env.AUTH0_BASE_URL;
+  const configured = process.env.NEXT_PUBLIC_APP_URL;
   if (configured) return configured.replace(/\/$/, "");
   return "http://localhost:3000";
 }
