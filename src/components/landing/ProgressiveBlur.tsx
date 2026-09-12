@@ -15,11 +15,11 @@ export function ProgressiveBlur({
   side,
   height = 140,
 }: {
-  side: "top" | "bottom"
-  height?: number
+  side: "top" | "bottom";
+  height?: number;
 }) {
-  const layers = [0.5, 1, 2, 4, 8]
-  const to = side === "top" ? "to bottom" : "to top"
+  const layers = [0.5, 1, 2, 4, 8];
+  const to = side === "top" ? "to bottom" : "to top";
 
   return (
     <div
@@ -32,7 +32,7 @@ export function ProgressiveBlur({
       {layers.map((blur, i) => {
         // Heavier blur is masked to a shorter window, so it only reaches the
         // outermost sliver; the lightest layer covers the whole band.
-        const stop = 100 - i * 20
+        const stop = 100 - i * 20;
         return (
           <div
             key={blur}
@@ -44,8 +44,8 @@ export function ProgressiveBlur({
               WebkitMaskImage: `linear-gradient(${to}, black 0%, black ${stop * 0.45}%, transparent ${stop}%)`,
             }}
           />
-        )
+        );
       })}
     </div>
-  )
+  );
 }

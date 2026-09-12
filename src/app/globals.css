@@ -294,9 +294,13 @@
   *:not([data-keep-motion]),
   *:not([data-keep-motion])::before,
   *:not([data-keep-motion])::after {
+    /* biome-ignore-start lint/complexity/noImportantStyles: a reduced-motion
+       reset has to beat utility classes and inline styles, or it is not a
+       reset. This is the one place !important is correct. */
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+    /* biome-ignore-end lint/complexity/noImportantStyles: end reset */
   }
 }

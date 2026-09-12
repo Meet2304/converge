@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useFieldClaim } from "@/components/field/FieldProvider"
-import { useSectionProgress } from "@/lib/use-section-progress"
+import { useFieldClaim } from "@/components/field/FieldProvider";
+import { useSectionProgress } from "@/lib/use-section-progress";
 
 /**
  * Coarse bands, never a false-precision figure.
@@ -15,23 +15,23 @@ const BANDS = [
   { label: "~ 20 m", warmth: 2 },
   { label: "~ 8 m", warmth: 3 },
   { label: "close", warmth: 4 },
-] as const
+] as const;
 
 const GATES = [
   "The organizer turns the map on",
   "You Join before you share location",
   "They turn on want to be found",
   "On a team, you see your teammates only",
-]
+];
 
 export function FindSection() {
   // Convergence is literally 1 − distance/max here — field.md §4.1. The field
   // is not illustrating the finder; it is the finder.
-  const ref = useFieldClaim({ from: 0.1, to: 0.95 })
-  const progress = useSectionProgress(ref)
+  const ref = useFieldClaim({ from: 0.1, to: 0.95 });
+  const progress = useSectionProgress(ref);
 
-  const band = BANDS[Math.min(BANDS.length - 1, Math.floor(progress * BANDS.length))]
-  const arrived = band.warmth === 4
+  const band = BANDS[Math.min(BANDS.length - 1, Math.floor(progress * BANDS.length))];
+  const arrived = band.warmth === 4;
 
   return (
     <section
@@ -58,9 +58,7 @@ export function FindSection() {
             )}
           </div>
 
-          <p className="code-l text-ink mt-2 text-center tabular-nums">
-            {band.label}
-          </p>
+          <p className="code-l text-ink mt-2 text-center tabular-nums">{band.label}</p>
 
           <div className="mt-5 flex items-center justify-center gap-2">
             <span className="body-s text-ink-3">warmer</span>
@@ -84,8 +82,8 @@ export function FindSection() {
         <div className="measure">
           <h2 className="display-m text-ink">Walk toward each other.</h2>
           <p className="body-l text-ink-2 mt-5">
-            Indoors we tell you warmer or colder, instead of pretending to know
-            exactly where you are.
+            Indoors we tell you warmer or colder, instead of pretending to know exactly where you
+            are.
           </p>
 
           {/* Show the gate, and what unlocks it, in that order. */}
@@ -102,12 +100,12 @@ export function FindSection() {
 
           {/* The animation is decorative; the content is not. */}
           <p className="sr-only">
-            As you get closer the finder moves through coarse distance bands —
-            about 40 metres, about 20 metres, about 8 metres, then close —
-            rather than showing an exact position it cannot measure.
+            As you get closer the finder moves through coarse distance bands — about 40 metres,
+            about 20 metres, about 8 metres, then close — rather than showing an exact position it
+            cannot measure.
           </p>
         </div>
       </div>
     </section>
-  )
+  );
 }

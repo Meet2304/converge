@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useEffect, useState, type RefObject } from "react"
+import { type RefObject, useEffect, useState } from "react";
 
-const clamp01 = (n: number) => (n < 0 ? 0 : n > 1 ? 1 : n)
+const clamp01 = (n: number) => (n < 0 ? 0 : n > 1 ? 1 : n);
 
 /**
  * How far a section has travelled through the viewport, 0 → 1.
@@ -12,34 +12,34 @@ const clamp01 = (n: number) => (n < 0 ? 0 : n > 1 ? 1 : n)
  * only reports where things are.
  */
 export function useSectionProgress(ref: RefObject<HTMLElement | null>) {
-  const [progress, setProgress] = useState(0)
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    let frame = 0
+    let frame = 0;
 
     const measure = () => {
-      frame = 0
-      const el = ref.current
-      if (!el) return
-      const rect = el.getBoundingClientRect()
-      const vh = window.innerHeight
-      setProgress(clamp01((vh - rect.top) / (rect.height + vh)))
-    }
+      frame = 0;
+      const el = ref.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      setProgress(clamp01((vh - rect.top) / (rect.height + vh)));
+    };
 
     const onScroll = () => {
-      if (frame) return
-      frame = requestAnimationFrame(measure)
-    }
+      if (frame) return;
+      frame = requestAnimationFrame(measure);
+    };
 
-    measure()
-    window.addEventListener("scroll", onScroll, { passive: true })
-    window.addEventListener("resize", onScroll, { passive: true })
+    measure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
     return () => {
-      if (frame) cancelAnimationFrame(frame)
-      window.removeEventListener("scroll", onScroll)
-      window.removeEventListener("resize", onScroll)
-    }
-  }, [ref])
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [ref]);
 
-  return progress
+  return progress;
 }

@@ -1,7 +1,7 @@
-import Link from "next/link"
-import { FieldSection } from "@/components/field/FieldSection"
+import Link from "next/link";
+import { FieldSection } from "@/components/field/FieldSection";
 
-const REPO = "https://github.com/Meet2304/converge"
+const REPO = "https://github.com/Meet2304/converge";
 
 /**
  * The pre-event side, kept deliberately quiet so nobody concludes Converge is
@@ -21,7 +21,7 @@ export function PreEventSection() {
       term: "Team",
       copy: "Form a team before the doors open. Every team gets a group chat.",
     },
-  ]
+  ];
 
   return (
     <FieldSection id="before" from={0.5} className="px-5 py-32">
@@ -40,7 +40,7 @@ export function PreEventSection() {
         </dl>
       </div>
     </FieldSection>
-  )
+  );
 }
 
 export function OrganizationsSection() {
@@ -49,7 +49,7 @@ export function OrganizationsSection() {
     "Maximum team size",
     "When Looking opens",
     "Whether the map is on, and when it switches off",
-  ]
+  ];
 
   return (
     <FieldSection id="organizers" from={0.35} className="px-5 py-32">
@@ -78,7 +78,7 @@ export function OrganizationsSection() {
         </Link>
       </div>
     </FieldSection>
-  )
+  );
 }
 
 /**
@@ -91,16 +91,15 @@ export function OpenSourceSection() {
     "Your name stays hidden until you sign in. So does everyone else's.",
     "Your location is off until you turn it on, and it switches off when the event ends.",
     "On a team, only your teammates can see where you are.",
-  ]
+  ];
 
   return (
     <FieldSection id="open-source" from={0.2} className="px-5 py-32">
       <div className="mx-auto w-full max-w-[720px]">
         <h2 className="display-m text-ink">Open source, under AGPL-3.0.</h2>
         <p className="body-l text-ink-2 measure mt-5">
-          The code is public and always will be. AGPL means anyone running
-          Converge — including us — has to publish their changes, so it
-          can&rsquo;t quietly become something else.
+          The code is public and always will be. AGPL means anyone running Converge — including us —
+          has to publish their changes, so it can&rsquo;t quietly become something else.
         </p>
 
         <ul className="mt-10 space-y-0">
@@ -124,7 +123,7 @@ export function OpenSourceSection() {
         </Link>
       </div>
     </FieldSection>
-  )
+  );
 }
 
 export function Footer() {
@@ -149,5 +148,5 @@ export function Footer() {
         </div>
       </div>
     </FieldSection>
-  )
+  );
 }

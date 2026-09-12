@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import type { ReactNode } from "react"
-import { useFieldClaim } from "./FieldProvider"
+import type { ReactNode } from "react";
+import { useFieldClaim } from "./FieldProvider";
 
 /**
  * A section that claims the field while it owns the viewport centre.
@@ -16,16 +16,16 @@ export function FieldSection({
   children,
   id,
 }: {
-  from: number
-  to?: number
-  className?: string
-  children: ReactNode
-  id?: string
+  from: number;
+  to?: number;
+  className?: string;
+  children: ReactNode;
+  id?: string;
 }) {
-  const ref = useFieldClaim({ from, to: to ?? from })
+  const ref = useFieldClaim({ from, to: to ?? from });
   return (
     <section id={id} ref={ref} className={className}>
       {children}
     </section>
-  )
+  );
 }

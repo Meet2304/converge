@@ -1,16 +1,16 @@
-import { FieldProvider } from "@/components/field/FieldProvider"
-import { FieldSection } from "@/components/field/FieldSection"
-import { FindSection } from "@/components/landing/FindSection"
-import { JoinPanel } from "@/components/landing/JoinPanel"
-import { Loader } from "@/components/landing/Loader"
-import { Nav } from "@/components/landing/Nav"
-import { ProgressiveBlur } from "@/components/landing/ProgressiveBlur"
+import { FieldProvider } from "@/components/field/FieldProvider";
+import { FieldSection } from "@/components/field/FieldSection";
+import { FindSection } from "@/components/landing/FindSection";
+import { JoinPanel } from "@/components/landing/JoinPanel";
+import { Loader } from "@/components/landing/Loader";
+import { Nav } from "@/components/landing/Nav";
+import { ProgressiveBlur } from "@/components/landing/ProgressiveBlur";
 import {
   Footer,
   OpenSourceSection,
   OrganizationsSection,
   PreEventSection,
-} from "@/components/landing/Sections"
+} from "@/components/landing/Sections";
 
 export default function HomePage() {
   return (
@@ -41,5 +41,5 @@ export default function HomePage() {
         <Footer />
       </main>
     </FieldProvider>
-  )
+  );
 }

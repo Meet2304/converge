@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation"
-import { useId, useState, type FormEvent } from "react"
+import { useRouter } from "next/navigation";
+import { type FormEvent, useId, useState } from "react";
 
 /**
  * Pulls a code out of whatever someone pasted.
@@ -10,39 +10,39 @@ import { useId, useState, type FormEvent } from "react"
  * people copy the link they were given, not the fragment at the end of it.
  */
 export function normalizeCode(raw: string): string {
-  let value = raw.trim()
+  let value = raw.trim();
 
-  const match = value.match(/\/(?:e|event)\/([^/?#\s]+)/i)
-  if (match) value = match[1]
+  const match = value.match(/\/(?:e|event)\/([^/?#\s]+)/i);
+  if (match) value = match[1];
   else if (/^https?:\/\//i.test(value)) {
-    const tail = value.split(/[?#]/)[0].replace(/\/+$/, "").split("/").pop()
-    if (tail) value = tail
+    const tail = value.split(/[?#]/)[0].replace(/\/+$/, "").split("/").pop();
+    if (tail) value = tail;
   }
 
-  return value.replace(/[\s-]/g, "").toUpperCase()
+  return value.replace(/[\s-]/g, "").toUpperCase();
 }
 
 export function JoinPanel() {
-  const router = useRouter()
-  const inputId = useId()
-  const errorId = useId()
-  const [value, setValue] = useState("")
-  const [error, setError] = useState<string | null>(null)
+  const router = useRouter();
+  const inputId = useId();
+  const errorId = useId();
+  const [value, setValue] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   function onSubmit(event: FormEvent) {
-    event.preventDefault()
-    const code = normalizeCode(value)
+    event.preventDefault();
+    const code = normalizeCode(value);
 
     if (!code) {
-      setError("Enter your event code.")
-      return
+      setError("Enter your event code.");
+      return;
     }
 
-    setError(null)
+    setError(null);
     // Lookup lands with Supabase; until then the event route resolves the
     // code and owns the "no event with that code" state. Inventing a
     // client-side miss here would be a lie about data we do not have.
-    router.push(`/event/${encodeURIComponent(code.toLowerCase())}`)
+    router.push(`/event/${encodeURIComponent(code.toLowerCase())}`);
   }
 
   return (
@@ -60,8 +60,8 @@ export function JoinPanel() {
         name="eventCode"
         value={value}
         onChange={(e) => {
-          setValue(e.target.value)
-          if (error) setError(null)
+          setValue(e.target.value);
+          if (error) setError(null);
         }}
         autoComplete="off"
         autoCapitalize="characters"
@@ -90,5 +90,5 @@ export function JoinPanel() {
         Open event
       </button>
     </form>
-  )
+  );
 }

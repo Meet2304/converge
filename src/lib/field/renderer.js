@@ -94,7 +94,7 @@ void main() {
 
 /* --------------------------------------------------------------- constants */
 
-export const NOISE_MODES = ['white', 'ign', 'blue'];
+export const NOISE_MODES = ["white", "ign", "blue"];
 
 /**
  * Locked values. The light field was derived by auto-fit against
@@ -102,15 +102,25 @@ export const NOISE_MODES = ['white', 'ign', 'blue'];
  * calls made by eye. See field.md §10.
  */
 export const FIELD_DEFAULTS = {
-  waist: 0.548, flare: 0.460, sigma: 0.142, freq: 14.26,
-  gain: 0.426, gamma: 0.626, halo: 0.053, haloSigma: 0.740,
-  ring: 0.14, levels: 10, grain: 1.70,
-  vigInner: 0.00, vigOuter: 4.00,
-  noise: 1                                   // ign
+  waist: 0.548,
+  flare: 0.46,
+  sigma: 0.142,
+  freq: 14.26,
+  gain: 0.426,
+  gamma: 0.626,
+  halo: 0.053,
+  haloSigma: 0.74,
+  ring: 0.14,
+  levels: 10,
+  grain: 1.7,
+  vigInner: 0.0,
+  vigOuter: 4.0,
+  noise: 1, // ign
 };
 
 /** Convergence 0 → 1 maps onto this waist range. */
-export const WAIST_OPEN = 0.85, WAIST_CLOSED = 0.06;
+export const WAIST_OPEN = 0.85,
+  WAIST_CLOSED = 0.06;
 
 /**
  * Aspect the locked parameters were fitted at (the reference header).
@@ -122,18 +132,20 @@ export const WAIST_OPEN = 0.85, WAIST_CLOSED = 0.06;
  * the multiplier is exactly 1, so nothing about the fitted look changes.
  */
 export const REFERENCE_ASPECT = 2.3337;
-export const aspectFlare = (w, h) =>
-  Math.max(0.4, Math.min(1.15, w / h / REFERENCE_ASPECT));
+export const aspectFlare = (w, h) => Math.max(0.4, Math.min(1.15, w / h / REFERENCE_ASPECT));
 
 /** Damping time constants, seconds. field.md §3.1. */
-export const TAU = { origin: 0.18, gain: 0.45, flare: 0.25, waist: 0.90 };
+export const TAU = { origin: 0.18, gain: 0.45, flare: 0.25, waist: 0.9 };
 
 /** Team-formed response. field.md §4.2. */
 export const BLOOM = {
-  amount: 0.95, delay: 0.60, gather: 0.38,
-  attack: 0.32, decay: 2.20,
-  slowdown: 1.8,      // waist tau multiplier while the sequence runs
-  haloLift: 2.2       // halo multiplier at peak — scale, not just brightness
+  amount: 0.95,
+  delay: 0.6,
+  gather: 0.38,
+  attack: 0.32,
+  decay: 2.2,
+  slowdown: 1.8, // waist tau multiplier while the sequence runs
+  haloLift: 2.2, // halo multiplier at peak — scale, not just brightness
 };
 
 /** Held-state breathing. */
@@ -165,7 +177,7 @@ export function bloomEnvelope(t, attack, decay, gather) {
   if (t < 0) return g;
   const peakT = attack * Math.log(1 + decay / attack);
   const peakV = (1 - Math.exp(-peakT / attack)) * Math.exp(-peakT / decay);
-  return (1 - Math.exp(-t / attack)) * Math.exp(-t / decay) / Math.max(peakV, 1e-6) + g;
+  return ((1 - Math.exp(-t / attack)) * Math.exp(-t / decay)) / Math.max(peakV, 1e-6) + g;
 }
 
 /**
@@ -177,23 +189,42 @@ export function makeBlueNoise(size = 64, passes = 4) {
   let v = new Float32Array(n);
   for (let i = 0; i < n; i++) v[i] = Math.random();
 
-  const R = 3, sig = 1.5, K = [];
+  const R = 3,
+    sig = 1.5,
+    K = [];
   for (let d = -R; d <= R; d++) K.push(Math.exp(-(d * d) / (2 * sig * sig)));
 
   for (let pass = 0; pass < passes; pass++) {
-    const tmp = new Float32Array(n), low = new Float32Array(n);
-    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-      let s = 0, w = 0;
-      for (let d = -R; d <= R; d++) { const k = K[d + R]; s += k * v[y * size + ((x + d + size) % size)]; w += k; }
-      tmp[y * size + x] = s / w;
+    const tmp = new Float32Array(n),
+      low = new Float32Array(n);
+    for (let y = 0; y < size; y++)
+      for (let x = 0; x < size; x++) {
+        let s = 0,
+          w = 0;
+        for (let d = -R; d <= R; d++) {
+          const k = K[d + R];
+          s += k * v[y * size + ((x + d + size) % size)];
+          w += k;
+        }
+        tmp[y * size + x] = s / w;
+      }
+    for (let y = 0; y < size; y++)
+      for (let x = 0; x < size; x++) {
+        let s = 0,
+          w = 0;
+        for (let d = -R; d <= R; d++) {
+          const k = K[d + R];
+          s += k * tmp[((y + d + size) % size) * size + x];
+          w += k;
+        }
+        low[y * size + x] = s / w;
+      }
+    const hi = new Float32Array(n),
+      idx = new Int32Array(n);
+    for (let i = 0; i < n; i++) {
+      hi[i] = v[i] - low[i];
+      idx[i] = i;
     }
-    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-      let s = 0, w = 0;
-      for (let d = -R; d <= R; d++) { const k = K[d + R]; s += k * tmp[((y + d + size) % size) * size + x]; w += k; }
-      low[y * size + x] = s / w;
-    }
-    const hi = new Float32Array(n), idx = new Int32Array(n);
-    for (let i = 0; i < n; i++) { hi[i] = v[i] - low[i]; idx[i] = i; }
     const order = Array.from(idx).sort((a, b) => hi[a] - hi[b]);
     const out = new Float32Array(n);
     for (let r = 0; r < n; r++) out[order[r]] = r / n;
@@ -206,9 +237,26 @@ export function makeBlueNoise(size = 64, passes = 4) {
 }
 
 const UNIFORM_NAMES = [
-  'uResolution', 'uOrigin', 'uWaist', 'uFlare', 'uSigma', 'uFreq', 'uGain',
-  'uGamma', 'uHalo', 'uHaloSigma', 'uRing', 'uBloom', 'uLevels', 'uGrain',
-  'uVigInner', 'uVigOuter', 'uNoiseMode', 'uTimeSeed', 'uBlue', 'uBlueSize'
+  "uResolution",
+  "uOrigin",
+  "uWaist",
+  "uFlare",
+  "uSigma",
+  "uFreq",
+  "uGain",
+  "uGamma",
+  "uHalo",
+  "uHaloSigma",
+  "uRing",
+  "uBloom",
+  "uLevels",
+  "uGrain",
+  "uVigInner",
+  "uVigOuter",
+  "uNoiseMode",
+  "uTimeSeed",
+  "uBlue",
+  "uBlueSize",
 ];
 
 function compile(gl, type, src) {
@@ -237,14 +285,20 @@ function compile(gl, type, src) {
  * must fall back to a baked still (field.md §8) rather than assume success.
  */
 export function createField(canvas, opts = {}) {
-  const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'high-performance' });
+  const gl = canvas.getContext("webgl2", {
+    antialias: false,
+    alpha: false,
+    powerPreference: "high-performance",
+  });
   if (!gl) return null;
 
   const program = gl.createProgram();
   gl.attachShader(program, compile(gl, gl.VERTEX_SHADER, VERTEX_SHADER));
   gl.attachShader(program, compile(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER));
   gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS))
+    throw new Error(gl.getProgramInfoLog(program));
+  // biome-ignore lint/correctness/useHookAtTopLevel: gl.useProgram is a WebGL call, not a React hook.
   gl.useProgram(program);
   gl.bindVertexArray(gl.createVertexArray());
 
@@ -260,18 +314,27 @@ export function createField(canvas, opts = {}) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8, BLUE_SIZE, BLUE_SIZE, 0, gl.RED, gl.UNSIGNED_BYTE,
-                makeBlueNoise(BLUE_SIZE, 4));
+  gl.texImage2D(
+    gl.TEXTURE_2D,
+    0,
+    gl.R8,
+    BLUE_SIZE,
+    BLUE_SIZE,
+    0,
+    gl.RED,
+    gl.UNSIGNED_BYTE,
+    makeBlueNoise(BLUE_SIZE, 4),
+  );
   gl.uniform1i(uniforms.uBlue, 0);
   gl.uniform1f(uniforms.uBlueSize, BLUE_SIZE);
 
   const params = { ...FIELD_DEFAULTS, ...(opts.params || {}) };
-  const tau    = { ...TAU };
+  const tau = { ...TAU };
   const bloomCfg = { ...BLOOM };
-  const breathe  = { ...BREATHE };
+  const breathe = { ...BREATHE };
 
-  const reduced = typeof matchMedia === 'function'
-    && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced =
+    typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const state = {
     convergence: opts.convergence ?? null,
@@ -283,14 +346,26 @@ export function createField(canvas, opts = {}) {
     // Breathing normally marks the held team-formed state. `ambient` makes it
     // available at any convergence, so a hero can stay alive without
     // pretending a team just formed.
-    ambient: opts.ambient ?? false
+    ambient: opts.ambient ?? false,
   };
 
-  const cur = { waist: params.waist, gain: params.gain, flare: params.flare,
-                ox: 0, oy: 0, aperture: 0, flareBoost: 0 };
+  const cur = {
+    waist: params.waist,
+    gain: params.gain,
+    flare: params.flare,
+    ox: 0,
+    oy: 0,
+    aperture: 0,
+    flareBoost: 0,
+  };
   const pointer = { x: 0, y: 0, speed: 0, active: false };
 
-  let W = 0, H = 0, raf = 0, last = performance.now(), frame = 0, running = false;
+  let W = 0,
+    H = 0,
+    raf = 0,
+    last = performance.now(),
+    frame = 0,
+    running = false;
 
   function waistFor(convergence) {
     return WAIST_OPEN + (WAIST_CLOSED - WAIST_OPEN) * convergence;
@@ -306,7 +381,8 @@ export function createField(canvas, opts = {}) {
     const w = Math.max(1, Math.round((r.width || canvas.clientWidth) * dpr));
     const h = Math.max(1, Math.round((r.height || canvas.clientHeight) * dpr));
     if (w === W && h === H) return;
-    W = canvas.width = w; H = canvas.height = h;
+    W = canvas.width = w;
+    H = canvas.height = h;
     gl.viewport(0, 0, W, H);
   }
 
@@ -338,48 +414,59 @@ export function createField(canvas, opts = {}) {
     resize();
 
     const seq = now / 1000 - state.bloomAt;
-    const tb  = seq - bloomCfg.delay;
-    const bloom = state.bloomHold !== null
-      ? state.bloomHold * bloomCfg.amount
-      : (state.frozen || tb > bloomCfg.decay * 6) ? 0
-      : bloomEnvelope(tb, bloomCfg.attack, bloomCfg.decay, bloomCfg.gather) * bloomCfg.amount;
+    const tb = seq - bloomCfg.delay;
+    const bloom =
+      state.bloomHold !== null
+        ? state.bloomHold * bloomCfg.amount
+        : state.frozen || tb > bloomCfg.decay * 6
+          ? 0
+          : bloomEnvelope(tb, bloomCfg.attack, bloomCfg.decay, bloomCfg.gather) * bloomCfg.amount;
 
     const inf = state.influence;
     const px = pointer.active ? pointer.x : 0;
     const py = pointer.active ? pointer.y : 0;
-    const apertureT = pointer.active ? Math.max(0, 1 - Math.min(1, Math.hypot(px, py) / 1.2)) * inf : 0;
-    const flareT    = pointer.active ? pointer.speed * inf : 0;
+    const apertureT = pointer.active
+      ? Math.max(0, 1 - Math.min(1, Math.hypot(px, py) / 1.2)) * inf
+      : 0;
+    const flareT = pointer.active ? pointer.speed * inf : 0;
     pointer.speed *= Math.exp(-dt / 0.12);
 
     if (state.frozen) {
-      cur.waist = params.waist; cur.gain = params.gain; cur.flare = params.flare;
+      cur.waist = params.waist;
+      cur.gain = params.gain;
+      cur.flare = params.flare;
       cur.ox = cur.oy = cur.aperture = cur.flareBoost = 0;
     } else {
-      cur.aperture   = damp(cur.aperture, apertureT, tau.gain, dt);
+      cur.aperture = damp(cur.aperture, apertureT, tau.gain, dt);
       cur.flareBoost = damp(cur.flareBoost, flareT, tau.flare, dt);
       cur.ox = damp(cur.ox, px * 0.35 * inf, tau.origin, dt);
       cur.oy = damp(cur.oy, py * 0.35 * inf, tau.origin, dt);
       // The close is ceremonial while the team-formed sequence runs.
-      const tauW = (seq >= 0 && seq < bloomCfg.delay + bloomCfg.decay * 3)
-        ? tau.waist * bloomCfg.slowdown : tau.waist;
+      const tauW =
+        seq >= 0 && seq < bloomCfg.delay + bloomCfg.decay * 3
+          ? tau.waist * bloomCfg.slowdown
+          : tau.waist;
       cur.waist = damp(cur.waist, params.waist * (1 - 0.35 * cur.aperture), tauW, dt);
-      cur.gain  = damp(cur.gain,  params.gain  * (1 + 0.25 * cur.aperture), tau.gain, dt);
-      cur.flare = damp(cur.flare, params.flare * (1 + 0.60 * cur.flareBoost), tau.flare, dt);
+      cur.gain = damp(cur.gain, params.gain * (1 + 0.25 * cur.aperture), tau.gain, dt);
+      cur.flare = damp(cur.flare, params.flare * (1 + 0.6 * cur.flareBoost), tau.flare, dt);
     }
 
-    const held = state.ambient
-      || (state.convergence !== null && state.convergence >= 0.98);
-    const breathMul = (held && !state.frozen)
-      ? 1 + breathe.amp * Math.sin(now / 1000 * (2 * Math.PI / breathe.period)) : 1;
+    const held = state.ambient || (state.convergence !== null && state.convergence >= 0.98);
+    const breathMul =
+      held && !state.frozen
+        ? 1 + breathe.amp * Math.sin((now / 1000) * ((2 * Math.PI) / breathe.period))
+        : 1;
 
     gl.uniform2f(uniforms.uResolution, W, H);
     applyUniforms(params, {
-      ox: cur.ox, oy: cur.oy, waist: cur.waist,
+      ox: cur.ox,
+      oy: cur.oy,
+      waist: cur.waist,
       flare: cur.flare * aspectFlare(W, H),
       gain: cur.gain * breathMul,
       halo: params.halo * (1 + Math.max(0, bloom) * bloomCfg.haloLift),
       bloom,
-      timeSeed: (state.shimmer && !state.frozen) ? (frame * 0.61803398875) % 1 * 64 : 0
+      timeSeed: state.shimmer && !state.frozen ? ((frame * 0.61803398875) % 1) * 64 : 0,
     });
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     frame++;
@@ -390,42 +477,75 @@ export function createField(canvas, opts = {}) {
   /* --------------------------------------------------------------- pointer */
 
   const target = opts.pointerTarget || canvas;
-  const onMove = e => {
+  const onMove = (e) => {
     const r = target.getBoundingClientRect();
-    const x = ((e.clientX - r.left) - r.width / 2) / (r.height / 2);
-    const y = -(((e.clientY - r.top) - r.height / 2) / (r.height / 2));
+    const x = (e.clientX - r.left - r.width / 2) / (r.height / 2);
+    const y = -((e.clientY - r.top - r.height / 2) / (r.height / 2));
     pointer.speed = Math.min(1, Math.hypot(x - pointer.x, y - pointer.y) * 6);
-    pointer.x = x; pointer.y = y; pointer.active = true;
+    pointer.x = x;
+    pointer.y = y;
+    pointer.active = true;
   };
-  const onLeave = () => { pointer.active = false; };
-  target.addEventListener('pointermove', onMove);
-  target.addEventListener('pointerleave', onLeave);
+  const onLeave = () => {
+    pointer.active = false;
+  };
+  target.addEventListener("pointermove", onMove);
+  target.addEventListener("pointerleave", onLeave);
 
   /* ---------------------------------------------------------- lifecycle */
 
-  function start() { if (running) return; running = true; last = performance.now(); raf = requestAnimationFrame(step); }
-  function stop()  { running = false; cancelAnimationFrame(raf); }
+  function start() {
+    if (running) return;
+    running = true;
+    last = performance.now();
+    raf = requestAnimationFrame(step);
+  }
+  function stop() {
+    running = false;
+    cancelAnimationFrame(raf);
+  }
 
   // A field nobody is looking at costs zero. field.md §9.
   let io = null;
-  const onVisibility = () => { if (document.hidden) stop(); else start(); };
-  if (opts.observe !== false && typeof IntersectionObserver === 'function') {
-    io = new IntersectionObserver(([e]) => { if (e.isIntersecting) start(); else stop(); }, { threshold: 0 });
+  const onVisibility = () => {
+    if (document.hidden) stop();
+    else start();
+  };
+  if (opts.observe !== false && typeof IntersectionObserver === "function") {
+    io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) start();
+        else stop();
+      },
+      { threshold: 0 },
+    );
     io.observe(canvas);
-    document.addEventListener('visibilitychange', onVisibility);
+    document.addEventListener("visibilitychange", onVisibility);
   }
 
   const onResize = () => resize();
-  window.addEventListener('resize', onResize);
+  window.addEventListener("resize", onResize);
 
   resize();
   if (opts.autoStart !== false) start();
 
   return {
-    gl, program, uniforms, params, tau, bloom: bloomCfg, breathe, state, cur,
+    gl,
+    program,
+    uniforms,
+    params,
+    tau,
+    bloom: bloomCfg,
+    breathe,
+    state,
+    cur,
     applyUniforms,
-    get width()  { return W; },
-    get height() { return H; },
+    get width() {
+      return W;
+    },
+    get height() {
+      return H;
+    },
     resize,
     draw: () => gl.drawArrays(gl.TRIANGLES, 0, 3),
     renderOnce: () => step(performance.now()),
@@ -436,7 +556,9 @@ export function createField(canvas, opts = {}) {
       params.waist = waistFor(v);
       if (o.bloom || (o.bloom !== false && v >= 0.98)) state.bloomAt = performance.now() / 1000;
     },
-    triggerBloom() { state.bloomAt = performance.now() / 1000; },
+    triggerBloom() {
+      state.bloomAt = performance.now() / 1000;
+    },
 
     /**
      * Drive convergence from scroll. Never fires the team-formed bloom —
@@ -447,22 +569,33 @@ export function createField(canvas, opts = {}) {
       params.waist = waistFor(v);
     },
 
-    setAmbient(v) { state.ambient = v; },
-    setInfluence(v) { state.influence = v; },
-    setFrozen(v) { state.frozen = v; },
-    setShimmer(v) { state.shimmer = v; },
+    setAmbient(v) {
+      state.ambient = v;
+    },
+    setInfluence(v) {
+      state.influence = v;
+    },
+    setFrozen(v) {
+      state.frozen = v;
+    },
+    setShimmer(v) {
+      state.shimmer = v;
+    },
     /** Pin the bloom envelope at a phase, for inspecting it as a still. */
-    holdBloom(v) { state.bloomHold = v; },
-    start, stop,
+    holdBloom(v) {
+      state.bloomHold = v;
+    },
+    start,
+    stop,
     destroy() {
       stop();
-      target.removeEventListener('pointermove', onMove);
-      target.removeEventListener('pointerleave', onLeave);
-      window.removeEventListener('resize', onResize);
-      document.removeEventListener('visibilitychange', onVisibility);
+      target.removeEventListener("pointermove", onMove);
+      target.removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("resize", onResize);
+      document.removeEventListener("visibilitychange", onVisibility);
       if (io) io.disconnect();
       gl.deleteProgram(program);
       gl.deleteTexture(blueTex);
-    }
+    },
   };
 }

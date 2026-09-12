@@ -1,4 +1,4 @@
-import Link from "next/link"
+import Link from "next/link";
 
 /**
  * Floats at the very top over the progressive blur. Never a solid bar, and it
@@ -23,5 +23,5 @@ export function Nav() {
         Create an event
       </Link>
     </header>
-  )
+  );
 }
