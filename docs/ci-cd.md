@@ -4,17 +4,20 @@ Converge uses one quality contract locally, in GitHub Actions, and during Vercel
 deployment cannot complete unless the same checks pass in this order:
 
 1. Install the exact dependencies from `bun.lock` with Bun 1.4.2.
-2. Run `biome ci .` for formatting, lint rules, and import organization.
-3. Run TypeScript in no-emit mode.
-4. Run the Bun test suite. The command succeeds while the repository has no tests and starts
+2. Run `biome format .` as an explicit full-codebase formatting check.
+3. Run `biome ci .` for lint rules, import organization, and Biome's combined CI verification.
+4. Run TypeScript in no-emit mode.
+5. Run the Bun test suite. The command succeeds while the repository has no tests and starts
    enforcing them automatically as soon as test files are added.
-5. Audit production dependencies for high or critical vulnerabilities.
-6. Build the production Next.js application.
+6. Audit production dependencies for high or critical vulnerabilities.
+7. Build the production Next.js application.
 
 ## Local commands
 
 ```bash
 bun install --frozen-lockfile
+bun run format       # format the entire supported codebase before opening or updating a PR
+bun run format:check # verify formatting without changing files
 bun run check        # report Biome issues
 bun run check:fix    # apply safe formatting, lint, and import fixes
 bun run typecheck
