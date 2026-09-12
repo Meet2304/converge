@@ -60,6 +60,16 @@ Read the vision in one pass: [`docs/vision.md`](docs/vision.md).
 - Anon session → Auth0 merge for likes, reports, and location (see auth.md).
 - Follow [docs/build-order.md](docs/build-order.md) / [plans/execution-order.md](plans/execution-order.md): skeleton → Auth0 → org spine → pre-event → day-of.
 
+## Before creating or updating a pull request
+
+1. Run `bun run format` from the repository root. This must format the entire supported codebase
+   with Biome, not only the files changed in the current task.
+2. Run `bun run ci` and fix every failure before pushing. The command explicitly verifies Biome
+   formatting, lint rules, import organization, TypeScript, tests, dependency security, and the
+   production build.
+3. Do not create or update a pull request while either command reports a failure. GitHub CI and
+   Vercel enforce the same Biome formatting gate.
+
 ## Out of scope unless asked
 
 - Recommendation / compatibility ranking
